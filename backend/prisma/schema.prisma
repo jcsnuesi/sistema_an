@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+ model Aspirantes {
+   id             Int      @id @default(autoincrement())
+   nombres        String
+   apellidos      String
+   f_nacimiento   String
+   lugar_nacimiento String
+   nacionalidad   String 
+   estado_civil   String
+   cedula         String  @unique
+   dir_calle      String
+   dir_sector     String
+   dir_provincia  String
+   dir_municipio  String
+   celular        String
+   email          String  @unique
+   ocupacion      String
+   genero         String
+   escuela        String
+   sector_educativo String
+   programa_al_que_aspira String
+   nombre_madre   String
+   apellido_madre String
+   telefono_madre String
+   nombre_padre   String
+   apellido_padre String
+   telefono_padre String
+   foto          String?
+   anioAplicacion String
+   discapacidad   String?
+   discapacidad_detalle String?
+   alergico       String?
+   rango     String?
+   institucion_militar String?
+   fecha_ingreso String?
+   fecha_ultimo_ascenso String?
+
+   fact_aspirantes Fact_aspirantes[]
+   observacion Observacion[]
+ }
+
+ model Observacion {
+    id               Int      @id @default(autoincrement())
+    id_aspirantes    Int
+    observacion      String
+    fecha_creacion   DateTime? @default(now())
+    fecha_actualizacion DateTime @updatedAt
+    aspirantes       Aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade)    
+    
+ }
+
+ model Fact_aspirantes {
+   id               Int      @id @default(autoincrement())
+   id_aspirantes    Int      @unique
+   estatus_solicitud String @default("En Proceso") //En Proceso, Selecionado, No Seleccionado
+   codigo_sistema   String
+   grupo            Int
+   genero_grupo     String
+   estatus_aspirante String @default("Activo") // Activo, Inactivo
+   fecha_creacion   DateTime? @default(now())
+   fecha_actualizacion DateTime @updatedAt 
+   aspirantes        Aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade)
+ }
+
+ model Staff {
+   id                 Int      @id @default(autoincrement())
+   public_id         String   @unique @default(cuid())
+   nombres            String
+   apellidos          String
+   correo_institucional String  @unique
+   password           String
+   cargo_id              Int
+   role_id            Int
+   departamento_id    Int
+   estado             String @default("Activo")
+   created_at         DateTime @default(now())
+   updated_at         DateTime @updatedAt
+   role               Role @relation(fields: [role_id], references: [id])
+   departamento       Departamento @relation(fields: [departamento_id], references: [id])
+   cargo              Cargo @relation(fields: [cargo_id], references: [id])
+
+ }
+
+ model Role {
+   id        Int      @id @default(autoincrement())
+   role_name String
+   permisos Json
+   staff     Staff[]
+ }
+
+model Departamento {
+  id        Int      @id @default(autoincrement())
+  departamento_nombre    String
+  staff     Staff[]
+}
+
+model Cargo {
+  id        Int      @id @default(autoincrement())
+  cargo_nombre    String
+  staff     Staff[]
+}
