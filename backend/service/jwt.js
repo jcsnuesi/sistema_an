@@ -16,3 +16,15 @@ export function createToken(user) {
 
   return jwt.encode(payload, secret);
 }
+export function createTokenForLoginConsulta(user) {
+  const payload = {
+    id: user.id,
+    cedula: user.cedula,
+    nombres: user.nombres,
+    apellidos: user.apellidos,
+    iat: moment().unix(),
+    exp: moment().add(1, "days").unix(),
+  };
+
+  return jwt.encode(payload, secret);
+}

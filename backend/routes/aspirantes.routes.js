@@ -25,6 +25,12 @@ router.get(
   authenticated,
   aspirantesController.nuevasSolicitudes
 );
+router.get(
+  "/get-observaciones/:id",
+  authenticated,
+  aspirantesController.getObsercacionesByAspirante
+);
+router.get("/consultar-solicitudes/:id", aspirantesController.getSolicited);
 
 // POST
 router.post(
@@ -32,10 +38,22 @@ router.post(
   [multipartMiddleware],
   aspirantesController.create
 );
+router.post("/edicion-solicitada", aspirantesController.solicitarEdicion);
+router.post("/login-consulta", aspirantesController.loginConsulta);
 
 // PUT
 router.put("/update-aspirante/:id", aspirantesController.update);
 router.put("/delete-aspirante/:id", aspirantesController.delete);
 router.put("/upt-avatar-aspirante/:path", [multipartMiddleware], updateAvatar);
+router.put(
+  "/update-estatus_solicitud/:id",
+  authenticated,
+  aspirantesController.updateSolicitud
+);
+router.put(
+  "/update-solicitud-aspirante",
+  authenticated,
+  aspirantesController.updateSolicitud
+);
 
 export default router;

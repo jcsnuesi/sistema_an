@@ -2,6 +2,7 @@ import validator from "validator";
 import { PrismaClient } from "@prisma/client";
 import { generarCodigoSistema } from "../service/generarCodigo.js";
 import { validateExtensions } from "../service/validateExtension.service.js";
+import { createTokenForLoginConsulta } from "../service/jwt.js";
 
 const prisma = new PrismaClient();
 
@@ -150,6 +151,30 @@ var aspirantesController = {
       });
     }
   },
+  updateSolicitud: async function (req, res) {
+    let paramId = req.params.id;
+    let params = req.body;
+
+    try {
+      await prisma.fact_aspirantes.update({
+        where: { id_aspirantes: parseInt(paramId) },
+        data: {
+          estatus_solicitud: params.estatus_solicitud,
+        },
+      });
+
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+        message: "Solicitud actualizada",
+      });
+    } catch (error) {
+      return res.status(500).send({
+        status: "error",
+        message: "Error al actualizar la solicitud",
+      });
+    }
+  },
   delete: async function (req, res) {
     let paramId = req.params.id;
 
@@ -253,7 +278,10 @@ var aspirantesController = {
         where: {
           fact_aspirantes: {
             some: {
-              estatus_solicitud: "En Proceso",
+              OR: [
+                { estatus_solicitud: "En Proceso" },
+                { estatus_solicitud: "Requiere Edición" },
+              ],
             },
           },
         },
@@ -271,6 +299,141 @@ var aspirantesController = {
       return res.status(500).send({
         status: "error",
         message: "Error al actualizar la foto del aspirante",
+      });
+    }
+  },
+  solicitarEdicion: async function (req, res) {
+    let param = req.body;
+
+    try {
+      var val_observation = !validator.isEmpty(param.observaciones);
+      var val_id = !validator.isEmpty(param.id.toString());
+    } catch (error) {
+      return res.status(500).send({
+        status: "error",
+        message: "Faltan datos por enviar",
+      });
+    }
+
+    if (val_observation && val_id) {
+      try {
+        await prisma.observacion.create({
+          data: {
+            observacion: param.observaciones,
+            id_aspirantes: parseInt(param.id),
+          },
+        });
+        await prisma.fact_aspirantes.update({
+          where: { id_aspirantes: parseInt(param.id) },
+          data: {
+            estatus_solicitud: "Requiere Edición",
+          },
+        });
+
+        await prisma.$disconnect();
+        return res.status(200).send({
+          status: "success",
+          message: "Solicitud de edición enviada",
+        });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+          status: "error",
+          message: "Error al enviar la solicitud de edición",
+        });
+      }
+    } else {
+      return res.status(500).send({
+        status: "error",
+        message: "Faltan datos por enviar ELSE",
+      });
+    }
+  },
+
+  getObsercacionesByAspirante: async function (req, res) {
+    let paramId = req.params.id;
+    try {
+      const observaciones = await prisma.observacion.findMany({
+        where: {
+          id_aspirantes: parseInt(paramId),
+        },
+      });
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+        message: observaciones,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        status: "error",
+        message: "Error al obtener las observaciones",
+      });
+    }
+  },
+  getSolicited: async function (req, res) {
+    let paramId = req.params.id;
+
+    try {
+      const aspirante = await prisma.aspirantes.findUnique({
+        where: {
+          cedula: paramId,
+        },
+        include: {
+          fact_aspirantes: true,
+        },
+      });
+
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+        message: aspirante,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        status: "error",
+        message: "Error al obtener la solicitud",
+      });
+    }
+  },
+  loginConsulta: async function (req, res) {
+    let param = req.body;
+
+    try {
+      const aspirante = await prisma.aspirantes.findFirst({
+        where: {
+          AND: [{ cedula: param.cedula }, { clave_temporal: param.password }],
+        },
+        include: {
+          fact_aspirantes: true,
+        },
+      });
+
+      if (aspirante) {
+        if (param.token) {
+          const token = createTokenForLoginConsulta(aspirante);
+
+          return res.status(200).send({
+            status: "success",
+            token: token,
+          });
+        }
+        await prisma.$disconnect();
+        return res.status(200).send({
+          status: "success",
+          message: aspirante,
+        });
+      } else {
+        await prisma.$disconnect();
+        return res.status(203).send({
+          status: "error",
+          message: "No se encontraron solicitudes con los datos proporcionados",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({
+        status: "error",
+        message: "Error al obtener la solicitud",
       });
     }
   },
