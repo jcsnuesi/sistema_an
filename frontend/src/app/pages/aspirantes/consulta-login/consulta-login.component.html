@@ -1,0 +1,26 @@
+<p-toast />
+
+<p-dialog [visible]="showDialog" styleClass="!border-0 !bg-transparent">
+    <ng-template #headless>
+        <form #loginConsulta="ngForm">
+            <div class="flex flex-col px-8 py-8 gap-6 rounded-2xl" style="border-radius: 12px; background-image: radial-gradient(circle at left top, var(--p-primary-400), var(--p-primary-700)); background: #0d4cc1">
+                <div class="brand-logo">
+                    <img src="/assets/logo-1.png" alt="Logo" width="31px" height="33px" />
+                    <h4 class="text-white font-semibold text-2xl align-text-center">Consultas</h4>
+                </div>
+                <div class="inline-flex flex-col gap-2">
+                    <label for="cedulalabel" class="text-primary-50 font-semibold">Cedula <i>(Incluya guiones)</i></label>
+                    <input pInputText id="cedulalabel" #cedula="ngModel" name="cedula" [(ngModel)]="data_aspirante.cedula" class="!bg-white/20 !border-0 !p-4 !text-primary-50 w-80" maxlength="13" required />
+                </div>
+                <div class="inline-flex flex-col gap-2">
+                    <label for="passwordlabel" class="text-primary-50 font-semibold">Contraseña</label>
+                    <input pInputText id="passwordlabel" #password="ngModel" name="password" [(ngModel)]="data_aspirante.password" class="!bg-white/20 !border-0 !p-4 !text-primary-50 w-80" type="password" required />
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- <button type="submit" styleClass="!p-4 w-full !text-primary-50 !border !border-white/30 hover:!bg-white/10" class="w-full">Consultar</button> -->
+                    <p-button label="Consultar" (click)="login()" [text]="true" styleClass="!p-4 w-full !text-primary-50 !border !border-white/30 hover:!bg-white/10" class="w-full" [disabled]="loginConsulta.invalid" />
+                </div>
+            </div>
+        </form>
+    </ng-template>
+</p-dialog>

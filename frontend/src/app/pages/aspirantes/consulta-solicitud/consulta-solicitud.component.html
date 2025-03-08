@@ -1,0 +1,274 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="card">
+    <p-card header="Actualizacion exitosa!✅" class="confetti-card" *ngIf="codigo_aspirante !== null">
+        <p>
+            Codigo de aspirante: {{ codigo_aspirante }}, Grupo: {{ grupo }} <br />
+            Este es tu identidad en el sistema.
+        </p>
+    </p-card>
+
+    <form *ngIf="codigo_aspirante == null" #aspirantesForm="ngForm" (ngSubmit)="onSubmit(aspirantesForm)">
+        <div class="flex font-semibold text-xl text-surface-900 dark:text-surface-0">
+            <div class="header-ancho">
+                <img src="/assets/logo-1.png" alt="Logo" width="65px" height="35px" />
+                <h4>Formulario de solicitud de admisión</h4>
+            </div>
+            <div class="flex justify-end gap-2 header-ancho">
+                <h4>Estatus: <p-tag [severity]="getSeverity(estatus_solicitud_update)" [value]="estatus_solicitud_update" /></h4>
+            </div>
+        </div>
+
+        <p-panel [style]="{ 'margin-bottom': '15px' }">
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mb-5" style="margin-bottom: 15px">
+                <h5>Datos Personales</h5>
+            </div>
+
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2 flex flex-col gap-2 center-content">
+                    <img [src]="preview" alt="avatar" width="145px" height="135px" />
+                    <p-fileupload
+                        mode="basic"
+                        name="demo[]"
+                        chooseIcon="pi pi-upload"
+                        url="https://www.primefaces.org/cdn/api/upload.php"
+                        accept="image/*"
+                        maxFileSize="1000000"
+                        (onUpload)="onBasicUploadAuto($event)"
+                        [auto]="true"
+                        chooseLabel="Subir foto"
+                    />
+                </div>
+                <span class="text-spacing"
+                    ><b>Requisitos para la foto:</b>
+                    <ul>
+                        <li>Debe ser una foto formal</li>
+                        <li>Debe ser de los hombros hacia arriba</li>
+                    </ul>
+                </span>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2 flex flex-col gap-2">
+                    <label for="nombresLabel">Nombres</label>
+                    <input id="nombresLabel" type="text" pInputText #nombres="ngModel" name="nombres" [(ngModel)]="solicitud.nombres" required />
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="apellidosLabel">Apellidos</label>
+                    <input id="apellidosLabel" type="text" pInputText #apellidos="ngModel" name="apellidos" [(ngModel)]="solicitud.apellidos" required />
+                </div>
+                <div class="col md:w-100 ml-4 flex flex-col gap-2">
+                    <label for="generoLabel">Genero</label>
+                    <p-select [options]="optionGenero" id="generoLabel" #genero="ngModel" name="genero" [(ngModel)]="generoSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                </div>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="col w-100 flex flex-col gap-2">
+                    <label for="fechaNacimientoLabel">Fecha de nacimiento</label>
+                    <p-inputmask id="fechaNacimientoLabel" mask="99/99/9999" #f_nacimiento="ngModel" name="f_nacimiento" placeholder="dd/mm/yyyy" [(ngModel)]="solicitud.f_nacimiento" required></p-inputmask>
+                </div>
+
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="l_nacimientoLabel">Lugar de nacimiento</label>
+                    <input id="l_nacimientoLabel" type="text" pInputText #l_nacimiento="ngModel" name="l_nacimiento" [(ngModel)]="solicitud.lugar_nacimiento" required />
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="nacionalidadLabel">Nacionalidad</label>
+                    <input id="nacionalidadLabel" type="text" pInputText #nacionalidad="ngModel" name="nacionalidad" [(ngModel)]="solicitud.nacionalidad" required />
+                </div>
+            </div>
+            <div class="info-personal row mt-4 mb-5">
+                <div class="col md:w-100 flex flex-col gap-2">
+                    <label for="estadoCivilLabel">Estado civil</label>
+                    <p-select [options]="optionEstadoCivil" id="estadoCivilLabel" #e_civil="ngModel" name="e_civil" [(ngModel)]="estadoCivilSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="cedulaLabel">Cedula</label>
+                    <p-inputmask id="cedulaLabel" mask="999-9999999-9" placeholder="402-1111111-1" #cedula="ngModel" name="cedula" [(ngModel)]="solicitud.cedula" required></p-inputmask>
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="ocupacionLabel">Ocupacion</label>
+                    <p-select [options]="optionOcupacion" id="ocupacionLabel" #ocupacion="ngModel" name="ocupacion" [(ngModel)]="ocupacionSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                </div>
+            </div>
+
+            <div *ngIf="ocupacionSelected.value == 'Militar'" class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Militares</h5>
+            </div>
+
+            <div class="info-personal row mt-4 mb-5" *ngIf="ocupacionSelected.value == 'Militar'">
+                <div class="col md:w-100 flex flex-col gap-2">
+                    <label for="institucionlLabel">Institucion</label>
+                    <p-select
+                        [options]="institucionesMilitaresOptions"
+                        id="institucionlLabel"
+                        #institucion_militar="ngModel"
+                        name="institucion_militar"
+                        [(ngModel)]="institucionesSelected"
+                        optionLabel="label"
+                        placeholder="Seleccionar..."
+                        (onChange)="rangosList()"
+                    />
+                </div>
+                <div class="col md:w-100 ml-4 flex flex-col gap-2">
+                    <label for="rangoLabel">Rango</label>
+                    <p-select [options]="rangosOptions" id="rangoLabel" #rango="ngModel" name="rango" [(ngModel)]="rangoSelected" optionLabel="label" placeholder="Seleccionar..." />
+                </div>
+
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="f_ingresoLabel">Fecha ingreso</label>
+                    <p-inputmask id="f_ingresoLabel" mask="99/9999" placeholder="mm/yyyy" #f_ingreso="ngModel" name="f_ingreso" [(ngModel)]="solicitud.fecha_ingreso" required></p-inputmask>
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="fecha_ultimo_ascensoLabel">Fecha ultimo ascenso</label>
+                    <p-inputmask id="fecha_ultimo_ascensoLabel" mask="99/9999" placeholder="mm/yyyy" #fecha_ultimo_ascenso="ngModel" name="fecha_ultimo_ascenso" [(ngModel)]="solicitud.fecha_ultimo_ascenso" required></p-inputmask>
+                </div>
+            </div>
+
+            <hr />
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Datos medicos</h5>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2 flex flex-col gap-2">
+                    <label for="alergicoLabel">Alergico a:</label>
+                    <input type="text" pInputText id="alergicoLabel" #alergico="ngModel" name="alergico" [(ngModel)]="solicitud.alergico" />
+                </div>
+
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="discapacidadLabel">¿Tiene alguna discapacidad?</label>
+                    <p-select [options]="optionDiscapacidad" id="discapacidadLabel" #discapacidad="ngModel" name="discapacidad" [(ngModel)]="descapasidadSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                </div>
+            </div>
+            <div class="info-personal row mt-4 mb-5">
+                <div class="col md:w-1/2 flex flex-col gap-2" *ngIf="descapasidadSelected.value == 'Si'">
+                    <label for="discapacidadEspLabel">Especifique su discapacidad</label>
+
+                    <textarea pTextarea #discapacidadEs="ngModel" name="discapacidadEs" [(ngModel)]="solicitud.discapacidad_detalle" rows="3"></textarea>
+                </div>
+            </div>
+
+            <hr />
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Contactos</h5>
+            </div>
+
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2 flex flex-col gap-2">
+                    <label for="telefonoLabel">Telefono</label>
+                    <p-inputmask id="telefonoLabel" mask="999-999-9999" placeholder="809-777-8899" #telefono="ngModel" name="telefono" [(ngModel)]="solicitud.telefono"></p-inputmask>
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="celularLabel">Celular</label>
+                    <p-inputmask id="celularLabel" mask="999-999-9999" placeholder="809-777-8899" #celular="ngModel" name="celular" [(ngModel)]="solicitud.celular" required></p-inputmask>
+                </div>
+                <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                    <label for="emailLabel">Correo/Email</label>
+
+                    <input pInputText id="emailLabel" type="email" placeholder="usuario@ejemplo.com" #email="ngModel" name="email" [(ngModel)]="solicitud.email" required />
+                </div>
+            </div>
+
+            <hr />
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Dirección</h5>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2">
+                    <div class="flex flex-col gap-2">
+                        <label for="direccionLabel">Calle</label>
+                        <input id="direccionLabel" type="text" pInputText #dir_calle="ngModel" name="dir_calle" [(ngModel)]="solicitud.dir_calle" placeholder="Calle Armando Jose, No.22" required />
+                    </div>
+                </div>
+                <div class="col md:w-1/2 ml-4">
+                    <div class="flex flex-col gap-2">
+                        <label for="sectorLabel">Sector</label>
+                        <input id="sectorLabel" type="text" pInputText #dir_sector="ngModel" name="dir_sector" [(ngModel)]="solicitud.dir_sector" placeholder="Arroyo hondo" />
+                    </div>
+                </div>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="col md:w-1/2">
+                    <div class="flex flex-col gap-2">
+                        <label for="municipioLabel">Municipio de procedencia</label>
+                        <input id="municipioLabel" type="text" pInputText #municipio="ngModel" name="municipio" [(ngModel)]="solicitud.dir_municipio" placeholder="Santo Domingo Oeste" required />
+                    </div>
+                </div>
+
+                <div class="col md:w-1/2 ml-4">
+                    <div class="flex flex-col gap-2">
+                        <label for="dir_provinciaLabel">Provincia</label>
+                        <input id="dir_provinciaLabel" type="text" pInputText #dir_provincia="ngModel" name="dir_provincia" [(ngModel)]="solicitud.dir_provincia" placeholder="Santo Domingo" required />
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Datos academicos</h5>
+            </div>
+
+            <div class="info-personal row mt-4">
+                <div class="flex flex-col gap-2" style="width: 100%">
+                    <label for="escuelaLabel">Centro Educativo</label>
+                    <input id="escuelaLabel" type="text" pInputText #escuela="ngModel" name="escuela" [(ngModel)]="solicitud.escuela" required />
+                </div>
+                <div class="col ml-4 flex flex-col gap-2" style="width: 100%">
+                    <label for="sectorEduLabel">Sector educativo</label>
+                    <p-select [options]="sectorEduOptions" id="sectorEduLabel" #sector_educativo="ngModel" name="sector_educativo" [(ngModel)]="sectorEduSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                </div>
+                <div class="col ml-4 flex flex-col gap-2" style="width: 100%">
+                    <label for="programa_al_que_aspiraLabel">Programa al que aspira</label>
+                    <input id="programa_al_que_aspiraLabel" type="text" pInputText #programa_al_que_aspira="ngModel" name="programa_al_que_aspira" [(ngModel)]="solicitud.programa_al_que_aspira" readonly />
+                </div>
+            </div>
+
+            <hr />
+            <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h5>Datos Familiares</h5>
+            </div>
+
+            <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h6>Informacio del padre:</h6>
+            </div>
+
+            <div class="info-personal row mt-4">
+                <div class="flex flex-col gap-2" style="width: 100%">
+                    <label for="padreLabel">Nombres</label>
+                    <input id="padreLabel" type="text" pInputText #padre="ngModel" name="padre" [(ngModel)]="solicitud.nombre_padre" />
+                </div>
+                <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                    <label for="apellidosPadreLabel">Apellidos</label>
+                    <input id="apellidosPadreLabel" type="text" pInputText #apellido_padre="ngModel" name="apellido_padre" [(ngModel)]="solicitud.apellido_padre" />
+                </div>
+                <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                    <label for="tel_padreLabel">Telefono</label>
+                    <p-inputmask id="tel_padreLabel" mask="999-999-9999" placeholder="849-444-5555" #tel_padre="ngModel" name="tel_padre" [(ngModel)]="solicitud.telefono_padre"></p-inputmask>
+                </div>
+            </div>
+
+            <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                <h6>Informacio del madre:</h6>
+            </div>
+            <div class="info-personal row mt-4">
+                <div class="flex flex-col gap-2" style="width: 100%">
+                    <label for="madreLabel">Nombres</label>
+                    <input id="madreLabel" type="text" pInputText #madre="ngModel" name="madre" [(ngModel)]="solicitud.nombre_madre" required />
+                </div>
+                <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                    <label for="apellidosMadreLabel">Apellidos</label>
+                    <input id="apellidosMadreLabel" type="text" pInputText #apellido_madre="ngModel" name="apellido_madre" [(ngModel)]="solicitud.apellido_madre" required />
+                </div>
+                <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                    <label for="telefono_madreLabel">Telefono</label>
+                    <p-inputmask id="telefono_madreLabel" mask="999-999-9999" placeholder="849-444-5555" #telefono_madre="ngModel" name="telefono_madre" [(ngModel)]="solicitud.telefono_madre" required></p-inputmask>
+                </div>
+            </div>
+        </p-panel>
+
+        <div class="flex justify-end mt-5">
+            <button pButton type="submit" severity="warn" label="Actualizar" size="large" class="p-button-success" [disabled]="aspirantesForm.invalid"></button>
+        </div>
+    </form>
+</div>

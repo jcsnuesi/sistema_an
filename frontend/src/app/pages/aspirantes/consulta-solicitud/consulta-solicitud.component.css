@@ -1,0 +1,37 @@
+.info-personal {
+    display: flex;
+}
+
+.p-inputtext {
+    width: 100%;
+}
+
+.header-ancho {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1cqmax;
+}
+
+.text-spacing {
+    line-height: 1.5;
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Estilos del Card */
+.confetti-card {
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    padding: 20px;
+}
+
+.p-card {
+    border-left: 3px solid #7cde9c;
+}
