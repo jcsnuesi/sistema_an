@@ -46,7 +46,7 @@ router.put("/update-aspirante/:id", aspirantesController.update);
 router.put("/delete-aspirante/:id", aspirantesController.delete);
 router.put("/upt-avatar-aspirante/:path", [multipartMiddleware], updateAvatar);
 router.put(
-  "/update-estatus_solicitud/:id",
+  "/update-estatus-solicitud/:id",
   authenticated,
   aspirantesController.updateSolicitud
 );

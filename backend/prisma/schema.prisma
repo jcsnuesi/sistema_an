@@ -76,10 +76,12 @@ model fact_aspirantes {
 model observacion {
   id                  Int        @id @default(autoincrement())
   id_aspirantes       Int
+  staff_id            Int
   observacion         String
   fecha_creacion      DateTime?  @default(now()) 
   aspirantes          aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade, map: "Observacion_id_aspirantes_fkey")
-
+  staff               staff      @relation(fields: [staff_id], references: [id], map: "Observacion_staff_id_fkey")
+  atentido            Boolean    @default(false)
   @@index([id_aspirantes], map: "Observacion_id_aspirantes_fkey")
 }
 
@@ -106,6 +108,7 @@ model staff {
   cargo                cargo        @relation(fields: [cargo_id], references: [id], map: "Staff_cargo_id_fkey")
   departamento         departamento @relation(fields: [departamento_id], references: [id], map: "Staff_departamento_id_fkey")
   role                 role         @relation(fields: [role_id], references: [id], map: "Staff_role_id_fkey")
+  observacion          observacion[]
 
   @@index([cargo_id], map: "Staff_cargo_id_fkey")
   @@index([departamento_id], map: "Staff_departamento_id_fkey")
