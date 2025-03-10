@@ -1,52 +1,19 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { FluidModule } from 'primeng/fluid';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputMaskModule } from 'primeng/inputmask';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
 import { CommonModule } from '@angular/common';
-import { PanelModule } from 'primeng/panel';
-import { FileUploadModule } from 'primeng/fileupload';
 import { AspirantesService } from '../../service/aspirantes.service';
 import { MessageService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmationService } from 'primeng/api';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { TagModule } from 'primeng/tag';
-import { Table } from 'primeng/table';
 import { PDFDocument } from 'pdf-lib';
 import { DialogModule } from 'primeng/dialog';
 import { globalUrl } from '../../service/global.url';
+import { ImportsModule } from '../primeNG.module';
+import { ConfirmationService } from 'primeng/api';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-solicitudes-entrantes',
-    imports: [
-        DialogModule,
-        TagModule,
-        FormsModule,
-        ButtonModule,
-        CommonModule,
-        FluidModule,
-        InputTextModule,
-        SelectModule,
-        TextareaModule,
-        PanelModule,
-        InputMaskModule,
-        FileUploadModule,
-        ToastModule,
-        ConfirmDialogModule,
-        CardModule,
-        TableModule,
-        IconFieldModule,
-        InputIconModule
-    ],
-    providers: [AspirantesService, MessageService, ConfirmationService, TableModule],
+    imports: [DialogModule, FormsModule, CommonModule, ImportsModule],
+    providers: [AspirantesService, MessageService, ConfirmationService],
     templateUrl: './solicitudes-entrantes.component.html',
     styleUrl: './solicitudes-entrantes.component.css'
 })
@@ -60,6 +27,8 @@ export class SolicitudesEntrantesComponent implements OnInit {
         { label: 'Procesada', value: 'Procesada' },
         { label: 'Requiere Edición', value: 'Requiere Edición' }
     ];
+    public messageObservaciones: Array<{ comentario: string; fecha_hora: string; staffId: number }> = [];
+    public dataAspirante: { id: string; foto: string } = { id: '', foto: '' };
     public estadoSelected: { label: string; value: string } = { label: '', value: '' };
     value: string = '';
     constructor(
@@ -69,7 +38,7 @@ export class SolicitudesEntrantesComponent implements OnInit {
     ) {
         this.nuevasSolicitudes = [];
         this.token =
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb3JyZW9faW5zdGl0dWNpb25hbCI6InRlY25vbG9naWFAYWNhZGVtaWEuY29tIiwibm9tYnJlcyI6IkhlY3RvciIsImFwZWxsaWRvcyI6IlNhbnRvcyIsInJvbGUiOnsiaWQiOjEsInJvbGVfbmFtZSI6IlNVUEVSX0FETUlOIiwicGVybWlzb3MiOiJcIkNSRUFURSwgUkVBRCwgVVBEQVRFLCBERUxFVEVcIiJ9LCJpYXQiOjE3NDEzMTMxMzksImV4cCI6MTc0MTM5OTUzOX0.Is7FHvXbG06T7T5ZgGIdP3eM4KcJRe0Qdmk4YN-xdY4';
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb3JyZW9faW5zdGl0dWNpb25hbCI6InRlY25vbG9naWFAYWNhZGVtaWEuY29tIiwibm9tYnJlcyI6IkhlY3RvciIsImFwZWxsaWRvcyI6IlNhbnRvcyIsInJvbGUiOnsiaWQiOjEsInJvbGVfbmFtZSI6IlNVUEVSX0FETUlOIiwicGVybWlzb3MiOiJcIkNSRUFURSwgUkVBRCwgVVBEQVRFLCBERUxFVEVcIiJ9LCJpYXQiOjE3NDE0NzAxODksImV4cCI6MTc0MTU1NjU4OX0.ucUSxhkohBmcgqX5QX8XfvK3QVnJb9L_qgC5QFBS_Fc';
         this.url = globalUrl.url;
     }
 
@@ -246,7 +215,7 @@ export class SolicitudesEntrantesComponent implements OnInit {
             next: (response: any) => {
                 if (response.status == 'success') {
                     for (let i = 0; i < response.message.length; i++) {
-                        this.messageObservaciones.push({ comentario: response.message[i].observacion, fecha_hora: new Date(response.message[i].fecha_creacion).toLocaleString() });
+                        this.messageObservaciones.push({ comentario: response.message[i].observacion, fecha_hora: new Date(response.message[i].fecha_creacion).toLocaleString(), staffId: response.message[i].staff_id });
                     }
                 }
             },
@@ -256,12 +225,11 @@ export class SolicitudesEntrantesComponent implements OnInit {
         });
     }
 
-    public messageObservaciones: Array<{ comentario: string; fecha_hora: string }> = [];
-    public dataAspirante: { id: string; foto: string } = { id: '', foto: '' };
     enviarObservacion() {
-        this.messageObservaciones.push({ comentario: this.value, fecha_hora: new Date().toLocaleString() });
+        this.messageObservaciones.push({ comentario: this.value, fecha_hora: new Date().toLocaleString(), staffId: 3 });
 
-        let dataToSend = { id: this.dataAspirante.id, observaciones: this.value };
+        let dataToSend = { id: this.dataAspirante.id, observaciones: this.value, staff_id: 3 };
+        this.value = '';
         this._aspirantesService.solicitarEdicion(dataToSend, this.token).subscribe({
             next: (response: any) => {
                 if (response.status == 'success') {

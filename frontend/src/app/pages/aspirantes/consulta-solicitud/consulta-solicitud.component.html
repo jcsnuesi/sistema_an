@@ -2,14 +2,14 @@
 <p-confirmDialog />
 
 <div class="card">
-    <p-card header="Actualizacion exitosa!✅" class="confetti-card" *ngIf="codigo_aspirante !== null">
+    <p-card header="Actualizacion exitosa!✅" *ngIf="status" class="mb-5">
         <p>
-            Codigo de aspirante: {{ codigo_aspirante }}, Grupo: {{ grupo }} <br />
-            Este es tu identidad en el sistema.
+            Tu solicitud de admisión ha sido actualizada exitosamente. <br />
+            <b>Recuerda:</b> Puedes consultar el estatus de tu solicitud en cualquier momento.
         </p>
     </p-card>
 
-    <form *ngIf="codigo_aspirante == null" #aspirantesForm="ngForm" (ngSubmit)="onSubmit(aspirantesForm)">
+    <form *ngIf="!status" #aspirantesForm="ngForm" (ngSubmit)="update()">
         <div class="flex font-semibold text-xl text-surface-900 dark:text-surface-0">
             <div class="header-ancho">
                 <img src="/assets/logo-1.png" alt="Logo" width="65px" height="35px" />
@@ -230,7 +230,7 @@
             </div>
 
             <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
-                <h6>Informacio del padre:</h6>
+                <h6>Información del padre:</h6>
             </div>
 
             <div class="info-personal row mt-4">
@@ -249,7 +249,7 @@
             </div>
 
             <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
-                <h6>Informacio del madre:</h6>
+                <h6>Información del madre:</h6>
             </div>
             <div class="info-personal row mt-4">
                 <div class="flex flex-col gap-2" style="width: 100%">

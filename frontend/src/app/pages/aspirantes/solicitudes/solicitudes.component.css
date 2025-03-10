@@ -10,21 +10,37 @@
     line-height: 1.5;
 }
 
+.confetti-card {
+    display: flex;
+}
+.p-panel-title {
+    font-size: 1.5em;
+}
+.link-primary {
+    color: #007bff;
+}
+.submgs {
+    font-size: 14px;
+}
+.ulClass {
+    list-style-type: disc;
+    padding-inline-start: 20px;
+}
+.ulPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Ajusta el espacio entre elementos */
+    padding: 0;
+    margin: 0;
+}
+
 .center-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
+    height: 100%;
 }
 
-/* Estilos del Card */
-.confetti-card {
-    font-weight: bold;
-    font-size: 16px;
-    text-align: center;
-    padding: 20px;
-}
-
-.p-card {
-    border-left: 3px solid #7cde9c;
+.separacion-texto {
+    line-height: 1.5;
 }

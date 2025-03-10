@@ -24,8 +24,14 @@ export class AspirantesService {
         return this._http.post(this.url + 'create-aspirante', aspirante);
     }
 
-    update(aspirante: FormData): Observable<any> {
-        return this._http.put(this.url + 'update-solicitud-aspirante', aspirante);
+    update(aspirante: FormData, token: string, id: string): Observable<any> {
+        let header = new HttpHeaders().set('Authorization', token);
+        return this._http.put(this.url + 'update-aspirante/' + id, aspirante, { headers: header });
+    }
+    updateBadge(token: string, datos: any): Observable<any> {
+        let param = JSON.stringify(datos);
+        let header = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
+        return this._http.put(this.url + 'update-badge/', param, { headers: header });
     }
 
     getNuevosAspirantes(token: string): Observable<any> {
@@ -60,14 +66,14 @@ export class AspirantesService {
     }
 
     getTokenAspirante(): string {
-        return this._cookieService.get('tokenAspirante');
+        return this._cookieService.get('token');
     }
     getIdentityAspirante(): any {
-        return JSON.parse(this._cookieService.get('identityAspirante') || '{}');
+        return JSON.parse(this._cookieService.get('identity') || '{}');
     }
 
     destroySession() {
-        this._cookieService.delete('tokenAspirante');
-        this._cookieService.delete('identityAspirante');
+        this._cookieService.delete('tokenAspirante', '/');
+        this._cookieService.delete('identityAspirante', '/');
     }
 }

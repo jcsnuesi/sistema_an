@@ -1,23 +1,26 @@
 import { CanActivateFn } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { CookieService } from 'ngx-cookie-service';
+import { UsersService } from '../pages/service/users.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UserGuard implements CanActivate {
+    public token: string | null;
     constructor(
         private router: Router,
-        private cookieService: CookieService
-    ) {}
+        private _userService: UsersService
+    ) {
+        this.token = this._userService.gettoken();
+    }
 
     canActivate(): boolean {
-        const token = this.cookieService.get('token') || null;
-        if (token) {
+        if (this.token) {
             return true;
         } else {
-            this.router.navigate(['/login']);
+            console.log('No tienes permiso para acceder a esta página');
+            this.router.navigate(['/users/login']);
             return false;
         }
     }

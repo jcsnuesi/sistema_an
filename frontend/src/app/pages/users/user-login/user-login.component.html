@@ -1,0 +1,27 @@
+<p-toast />
+
+<p-dialog [visible]="true" styleClass="!border-0 !bg-transparent">
+    <ng-template #headless>
+        <form #loginForm="ngForm">
+            <div class="flex flex-col px-8 py-8 gap-6 rounded-2xl" style="border-radius: 12px; background-image: radial-gradient(circle at left top, var(--p-primary-400), var(--p-primary-700)); background: hsl(219, 87%, 40%)">
+                <div class="brand-logo">
+                    <div class="logo-login">
+                        <img src="/assets/logo-1.png" alt="Logo" width="52px" height="38px" />
+                    </div>
+                    <h4 class="text-white font-semibold text-2xl">Inicio de sesión</h4>
+                </div>
+                <div class="inline-flex flex-col gap-2">
+                    <label for="correoLabel" class="text-primary-50 font-semibold">Correo</label>
+                    <input pInputText id="correoLabel" #correo="ngModel" name="correo" [(ngModel)]="data_usuario.correo_institucional" class="!bg-white/20 !border-0 !p-4 !text-primary-50 w-80" maxlength="50" required />
+                </div>
+                <div class="inline-flex flex-col gap-2">
+                    <label for="passwordlabel" class="text-primary-50 font-semibold">Contraseña</label>
+                    <input pInputText id="passwordlabel" #password="ngModel" name="password" [(ngModel)]="data_usuario.password" class="!bg-white/20 !border-0 !p-4 !text-primary-50 w-80" type="password" required />
+                </div>
+                <div class="flex items-center gap-4">
+                    <p-button label="Iniciar" (click)="login()" [text]="true" styleClass="!p-4 w-full !text-primary-50 !border !border-white/30 hover:!bg-white/10" class="w-full" [disabled]="loginForm.invalid" />
+                </div>
+            </div>
+        </form>
+    </ng-template>
+</p-dialog>

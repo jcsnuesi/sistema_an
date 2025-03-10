@@ -4,10 +4,12 @@ import { StatsWidget } from './components/statswidget';
 import { RecentSalesWidget } from './components/recentsaleswidget';
 import { BestSellingWidget } from './components/bestsellingwidget';
 import { RevenueStreamWidget } from './components/revenuestreamwidget';
+import { UsersService } from '../service/users.service';
 
 @Component({
     selector: 'app-dashboard',
     imports: [StatsWidget],
+    providers: [UsersService],
     template: `
         <div class="grid grid-cols-12 gap-8">
             <app-stats-widget class="contents" />

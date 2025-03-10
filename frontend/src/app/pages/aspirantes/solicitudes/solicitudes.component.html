@@ -1,15 +1,38 @@
 <p-toast />
 <p-confirmDialog />
 <div class="card">
-    <p-card header="¡Registro exitoso!✅" class="confetti-card" *ngIf="codigo_aspirante !== null">
-        <p>
-            Codigo de aspirante: {{ codigo_aspirante }}, Grupo: {{ grupo }} <br />
-            Este es tu identidad en el sistema.
-        </p>
-    </p-card>
+    <p-panel header="¡Registro exitoso!✅" *ngIf="nuevoAspirante.codigo_aspirante != null">
+        <div class="confetti-card">
+            <div>
+                <ul class="separacion-texto">
+                    <li><b>Codigo de aspirante:</b> M-3 {{ nuevoAspirante.codigo_aspirante }}</li>
+                    <li>
+                        <b>Grupo: 1 {{ nuevoAspirante.grupo }}</b>
+                    </li>
+                    <li><b>Contraseña:</b> {{ nuevoAspirante.clave }}</li>
+                    <li><span class="submgs">Guarde esta contraseña para que pueda consultar el estatus de su solicitud</span></li>
+                </ul>
+            </div>
+            <div style="margin-left: 20px">
+                <p style="margin-bottom: 0">
+                    <b>Estados:</b>
+                    <p-tag [severity]="getSeverity('En Proceso')" [value]="'En Proceso'" />
+                </p>
 
-    <form *ngIf="codigo_aspirante == null" #aspirantesForm="ngForm" (ngSubmit)="onSubmit(aspirantesForm)">
-        <div class="flex font-semibold text-xl text-surface-900 dark:text-surface-0" style="margin-bottom: 15px; text-align: center">
+                <ul class="ulPanel">
+                    <li>
+                        <p-button label="Nueva solicitud" [link]="true" (click)="nuevoAspirante.codigo_aspirante = null" />
+                    </li>
+                    <li>
+                        <p-button label="Ir al panel de consultas" [link]="true" [routerLink]="['aspirantes/consolta-solicitudes']" />
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </p-panel>
+
+    <form *ngIf="nuevoAspirante.codigo_aspirante == null" #aspirantesForm="ngForm" (ngSubmit)="onSubmit(aspirantesForm)">
+        <div class="flex" style="margin-bottom: 15px; text-align: center">
             <img src="/assets/logo-1.png" alt="Logo" width="65px" height="35px" />
             <h4>Formulario de solicitud de admisión</h4>
         </div>
@@ -36,7 +59,7 @@
                 </div>
                 <span class="text-spacing"
                     ><b>Requisitos para la foto:</b>
-                    <ul>
+                    <ul class="ulClass">
                         <li>Debe ser una foto formal</li>
                         <li>Debe ser de los hombros hacia arriba</li>
                     </ul>
@@ -146,9 +169,9 @@
             </div>
             <div class="info-personal row mt-4 mb-5">
                 <div class="col md:w-1/2 flex flex-col gap-2" *ngIf="habilitarDiscapacidad()">
-                    <label for="discapacidadLabel">Especifique su discapacidad</label>
+                    <label for="discapacidadDesLabel">Especifique su discapacidad</label>
 
-                    <textarea pTextarea #discapacidad="ngModel" name="discapacidad" [(ngModel)]="solicitud.discapacidad_detalle" rows="3"></textarea>
+                    <textarea pTextarea #discapacidadDes="ngModel" name="discapacidadDes" [(ngModel)]="solicitud.discapacidad_detalle" rows="3"></textarea>
                 </div>
             </div>
 
@@ -234,7 +257,7 @@
             </div>
 
             <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
-                <h6>Informacio del padre:</h6>
+                <h6>Información del padre:</h6>
             </div>
 
             <div class="info-personal row mt-4">
@@ -253,7 +276,7 @@
             </div>
 
             <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
-                <h6>Informacio del madre:</h6>
+                <h6>Información del madre:</h6>
             </div>
             <div class="info-personal row mt-4">
                 <div class="flex flex-col gap-2" style="width: 100%">

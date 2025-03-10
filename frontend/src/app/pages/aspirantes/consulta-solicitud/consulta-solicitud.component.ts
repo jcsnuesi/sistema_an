@@ -1,23 +1,11 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { FluidModule } from 'primeng/fluid';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputMaskModule } from 'primeng/inputmask';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
-import { CommonModule } from '@angular/common';
-import { PanelModule } from 'primeng/panel';
-import { FileUploadModule } from 'primeng/fileupload';
+import { NgForm } from '@angular/forms';
 import { AspirantesService } from '../../service/aspirantes.service';
 import { MessageService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService } from 'primeng/api';
-import { CardModule } from 'primeng/card';
 import { ActivatedRoute } from '@angular/router';
 import { globalUrl } from '../../service/global.url';
-import { TagModule } from 'primeng/tag';
+import { ImportsModule } from '../primeNG.module';
 
 type Solicitud = {
     nombres: string;
@@ -65,7 +53,7 @@ type Solicitud = {
 
 @Component({
     selector: 'app-consulta-solicitud',
-    imports: [FormsModule, ButtonModule, CommonModule, FluidModule, InputTextModule, SelectModule, TextareaModule, PanelModule, InputMaskModule, FileUploadModule, ToastModule, ConfirmDialogModule, CardModule, TagModule],
+    imports: [ImportsModule],
     encapsulation: ViewEncapsulation.None,
     providers: [AspirantesService, MessageService, ConfirmationService],
     templateUrl: './consulta-solicitud.component.html',
@@ -102,8 +90,10 @@ export class ConsultaSolicitudComponent implements OnInit {
     public grupo: string | null;
     public cedulaAspirante: string = '';
     public url: string;
-    public estatus_solicitud_update: string = 'Requiere Edición';
+    public estatus_solicitud_update: string;
     public loginVisible: boolean = false;
+    public tokenAspirante: string;
+    public status: boolean = false;
 
     constructor(
         private _aspirantesService: AspirantesService,
@@ -111,6 +101,7 @@ export class ConsultaSolicitudComponent implements OnInit {
         private _confirmationService: ConfirmationService,
         private _activatedRoute: ActivatedRoute
     ) {
+        this.tokenAspirante = this._aspirantesService.getTokenAspirante();
         this.optionEstadoCivil = [
             { label: 'Soltero', value: 'Soltero' },
             { label: 'Casado', value: 'Casado' },
@@ -177,6 +168,7 @@ export class ConsultaSolicitudComponent implements OnInit {
         this.codigo_aspirante = null;
         this.grupo = null;
         this.url = globalUrl.url;
+        this.estatus_solicitud_update = '';
     }
 
     public habilitarDiscapacidad: boolean = false;
@@ -222,76 +214,16 @@ export class ConsultaSolicitudComponent implements OnInit {
                     this.estadoCivilSelected = { label: data.estado_civil, value: data.estado_civil };
                     this.ocupacionSelected = { label: data.ocupacion, value: data.ocupacion };
                     this.institucionesSelected = { label: data.institucion_militar, value: data.institucion_militar };
+                    this.rangosList();
                     this.rangoSelected = { label: data.rango, value: data.rango };
                     this.sectorEduSelected = { label: data.sector_educativo, value: data.sector_educativo };
                     this.descapasidadSelected = { label: data.discapacidad ?? 'No', value: data.discapacidad ?? 'No' };
+                    this.estatus_solicitud_update = data.fact_aspirantes.map((item: any) => item.estatus_solicitud).pop();
                 },
                 error: (err) => {
                     console.log(err);
                 }
             });
-        });
-    }
-    onSubmit(form: NgForm) {
-        const formData = new FormData();
-        formData.append('foto', this.solicitud.foto ?? 'N/A');
-        formData.append('nombres', this.solicitud.nombres);
-        formData.append('apellidos', this.solicitud.apellidos);
-        formData.append('genero', this.generoSelected.label);
-        formData.append('f_nacimiento', this.solicitud.f_nacimiento);
-        formData.append('lugar_nacimiento', this.solicitud.lugar_nacimiento);
-        formData.append('nacionalidad', this.solicitud.nacionalidad);
-        formData.append('estado_civil', this.estadoCivilSelected.label);
-        formData.append('cedula', this.solicitud.cedula);
-        formData.append('ocupacion', this.ocupacionSelected.label);
-        formData.append('institucion_militar', this.institucionesSelected.label);
-        formData.append('rango', this.rangoSelected.label);
-        formData.append('fecha_ingreso', this.solicitud.fecha_ingreso ?? 'N/A');
-        formData.append('fecha_ultimo_ascenso', this.solicitud.fecha_ultimo_ascenso ?? 'N/A');
-        formData.append('alergico', this.solicitud.alergico ?? 'No');
-        formData.append('discapacidad', this.descapasidadSelected.label ?? 'N/A');
-        formData.append('discapacidad_detalle', this.solicitud.discapacidad_detalle ?? 'N/A');
-        formData.append('telefono', this.solicitud.telefono ?? 'No Posee');
-        formData.append('celular', this.solicitud.celular);
-        formData.append('email', this.solicitud.email);
-        formData.append('dir_calle', this.solicitud.dir_calle);
-        formData.append('dir_sector', this.solicitud.dir_sector ?? 'N/A');
-        formData.append('dir_municipio', this.solicitud.dir_municipio);
-        formData.append('dir_provincia', this.solicitud.dir_provincia);
-        formData.append('escuela', this.solicitud.escuela);
-        formData.append('sector_educativo', this.sectorEduSelected.label);
-        formData.append('programa_al_que_aspira', this.solicitud.programa_al_que_aspira);
-        formData.append('nombre_padre', this.solicitud.nombre_padre ?? 'N/A');
-        formData.append('apellido_padre', this.solicitud.apellido_padre ?? 'N/A');
-        formData.append('telefono_padre', this.solicitud.telefono_padre ?? 'N/A');
-        formData.append('nombre_madre', this.solicitud.nombre_madre);
-        formData.append('apellido_madre', this.solicitud.apellido_madre);
-        formData.append('telefono_madre', this.solicitud.telefono_madre);
-
-        this._confirmationService.confirm({
-            message: '¿Está seguro de que desea enviar la solicitud?',
-            header: 'Confirmación',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this._aspirantesService.create(formData).subscribe({
-                    next: (res) => {
-                        console.log(res);
-                        if (res.status === 'success') {
-                            this._messageService.add({ severity: 'success', summary: 'Aspirante registrado', detail: 'Su solicitud ha sido enviada exitosamente!' });
-                            form.reset();
-                            this.preview = '/assets/avatar.png';
-                            this.codigo_aspirante = res.message.fact_aspirantes[0].codigo_sistema;
-                            this.grupo = res.message.fact_aspirantes[0].grupo;
-                        }
-                    },
-                    error: (err) => {
-                        console.log(err);
-                    }
-                });
-            },
-            reject: () => {
-                this._messageService.add({ severity: 'info', summary: 'Cancelado', detail: 'Operación cancelada' });
-            }
         });
     }
 
@@ -340,7 +272,35 @@ export class ConsultaSolicitudComponent implements OnInit {
         formData.append('apellido_madre', this.solicitud.apellido_madre);
         formData.append('telefono_madre', this.solicitud.telefono_madre);
 
-        this._aspirantesService.update(formData).subscribe({});
+        this._confirmationService.confirm({
+            message: '¿Desea enviar la solicitud?',
+            header: 'Confirmación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptButtonStyleClass: 'p-button-success',
+            rejectButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this._aspirantesService.update(formData, this.tokenAspirante, this.cedulaAspirante).subscribe({
+                    next: (res) => {
+                        if (res.status == 'success') {
+                            this.status = true;
+                            this._messageService.add({
+                                severity: 'success',
+                                summary: 'Solicitud Actualizada',
+                                detail: 'La solicitud ha sido actualizada correctamente'
+                            });
+                        }
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        this._messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Error al actualizar la solicitud'
+                        });
+                    }
+                });
+            }
+        });
     }
 
     public preview: string = '';

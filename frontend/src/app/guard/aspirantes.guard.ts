@@ -14,6 +14,7 @@ export class AspirantesGuard implements CanActivate {
 
     canActivate(): boolean {
         const token = this.cookieService.get('tokenAspirante') || null;
+
         if (token) {
             return true;
         } else {

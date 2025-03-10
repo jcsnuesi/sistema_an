@@ -1,0 +1,9 @@
+.brand-logo {
+    text-align: center;
+    gap: 8px;
+}
+.logo-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

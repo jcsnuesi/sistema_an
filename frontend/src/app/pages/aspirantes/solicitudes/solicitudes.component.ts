@@ -1,20 +1,10 @@
 import { Component, ViewEncapsulation } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { FluidModule } from 'primeng/fluid';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputMaskModule } from 'primeng/inputmask';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
-import { CommonModule } from '@angular/common';
-import { PanelModule } from 'primeng/panel';
-import { FileUploadModule } from 'primeng/fileupload';
-import { AspirantesService } from '../../service/aspirantes.service';
 import { MessageService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
+import { AspirantesService } from '../../service/aspirantes.service';
 import { ConfirmationService } from 'primeng/api';
-import { CardModule } from 'primeng/card';
+import { NgForm } from '@angular/forms';
+import { ImportsModule } from '../primeNG.module';
+import { RouterModule } from '@angular/router';
 
 type Solicitud = {
     nombres: string;
@@ -62,9 +52,9 @@ type Solicitud = {
 
 @Component({
     selector: 'app-solicitudes',
+    imports: [ImportsModule, RouterModule],
     templateUrl: './solicitudes.component.html',
     styleUrl: './solicitudes.component.css',
-    imports: [FormsModule, ButtonModule, CommonModule, FluidModule, InputTextModule, SelectModule, TextareaModule, PanelModule, InputMaskModule, FileUploadModule, ToastModule, ConfirmDialogModule, CardModule],
     encapsulation: ViewEncapsulation.None,
     providers: [AspirantesService, MessageService, ConfirmationService]
 })
@@ -96,7 +86,7 @@ export class SolicitudesComponent {
     ];
     public sectorEduSelected: { label: string; value: string };
     public estadoCivilSelected: { label: string; value: string };
-    public codigo_aspirante: string | null;
+    public nuevoAspirante: { codigo_aspirante: string | null; grupo: string; clave: string } = { codigo_aspirante: null, grupo: '', clave: '' };
     public grupo: string | null;
 
     constructor(
@@ -169,7 +159,7 @@ export class SolicitudesComponent {
         this.generoSelected = { label: '', value: '' };
         this.estadoCivilSelected = { label: '', value: '' };
         this.preview = '/assets/avatar.png';
-        this.codigo_aspirante = null;
+
         this.grupo = null;
     }
     onSubmit(form: NgForm) {
@@ -207,7 +197,8 @@ export class SolicitudesComponent {
         formData.append('nombre_madre', this.solicitud.nombre_madre);
         formData.append('apellido_madre', this.solicitud.apellido_madre);
         formData.append('telefono_madre', this.solicitud.telefono_madre);
-
+        // "HKx<7x:/"
+        // "402-6544648-7"
         this._confirmationService.confirm({
             message: '¿Está seguro de que desea enviar la solicitud?',
             header: 'Confirmación',
@@ -219,9 +210,11 @@ export class SolicitudesComponent {
                         if (res.status === 'success') {
                             this._messageService.add({ severity: 'success', summary: 'Aspirante registrado', detail: 'Su solicitud ha sido enviada exitosamente!' });
                             form.reset();
+                            let datos = res.message;
                             this.preview = '/assets/avatar.png';
-                            this.codigo_aspirante = res.message.fact_aspirantes[0].codigo_sistema;
-                            this.grupo = res.message.fact_aspirantes[0].grupo;
+                            this.nuevoAspirante.codigo_aspirante = datos.fact_aspirantes[0].codigo_sistema;
+                            this.nuevoAspirante.grupo = datos.fact_aspirantes[0].grupo;
+                            this.nuevoAspirante.clave = datos.clave_temporal;
                         }
                     },
                     error: (err) => {
@@ -233,6 +226,15 @@ export class SolicitudesComponent {
                 this._messageService.add({ severity: 'info', summary: 'Cancelado', detail: 'Operación cancelada' });
             }
         });
+    }
+
+    getSeverity(severity: any) {
+        if (severity == 'En Proceso') {
+            return 'info';
+        } else if (severity == 'Requiere Edición') {
+            return 'warn';
+        }
+        return 'success';
     }
 
     habilitarDiscapacidad() {
