@@ -34,22 +34,34 @@ export class AspirantesService {
         return this._http.put(this.url + 'update-badge/', param, { headers: header });
     }
 
-    getNuevosAspirantes(token: string): Observable<any> {
+    getNuevosAspirantes(token: string | null): Observable<any> {
+        if (token == null) {
+            return error('No se ha proporcionado un token');
+        }
         let header = new HttpHeaders().set('Authorization', token);
         return this._http.get(this.url + 'nuevas-solicitudes', { headers: header });
     }
 
-    solicitarEdicion(aspirante: any, token: string): Observable<any> {
+    solicitarEdicion(aspirante: any, token: string | null): Observable<any> {
+        if (token == null) {
+            return error('No se ha proporcionado un token');
+        }
         let params = JSON.stringify(aspirante);
         let header = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
         return this._http.post(this.url + 'edicion-solicitada', params, { headers: header });
     }
-    getObservacionesById(token: string, id: string): Observable<any> {
+    getObservacionesById(token: string | null, id: string): Observable<any> {
+        if (token == null) {
+            return error('No se ha proporcionado un token');
+        }
         let header = new HttpHeaders().set('Authorization', token);
         return this._http.get(this.url + 'get-observaciones/' + id, { headers: header });
     }
 
-    updateSolicitud(token: string, status: string, id: string): Observable<any> {
+    updateSolicitud(token: string | null, status: string, id: string): Observable<any> {
+        if (token == null) {
+            return error('No se ha proporcionado un token');
+        }
         let header = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
         return this._http.put(this.url + 'update-estatus-solicitud/' + id, { estatus_solicitud: status }, { headers: header });
     }
@@ -66,10 +78,10 @@ export class AspirantesService {
     }
 
     getTokenAspirante(): string {
-        return this._cookieService.get('token');
+        return this._cookieService.get('tokenAspirante');
     }
     getIdentityAspirante(): any {
-        return JSON.parse(this._cookieService.get('identity') || '{}');
+        return JSON.parse(this._cookieService.get('identityAspirante') || '{}');
     }
 
     destroySession() {

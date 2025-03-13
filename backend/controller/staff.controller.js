@@ -3,7 +3,16 @@ import { PrismaClient } from "@prisma/client";
 import { validateExtensions } from "../service/validateExtension.service.js";
 import bcrypt from "bcrypt";
 import { createToken } from "../service/jwt.js";
-import { authenticated } from "../middleware/auth.js";
+
+const generatePassword = await import("generate-password");
+const password = generatePassword.default.generate({
+  length: 8, // Longitud de la contraseña
+  numbers: true, // Incluir números
+  symbols: true, // Incluir símbolos
+  uppercase: true, // Incluir letras mayúsculas
+  lowercase: true, // Incluir letras minúsculas
+  excludeSimilarCharacters: true, // Excluir caracteres similares
+});
 
 let salt = 10;
 
@@ -81,18 +90,23 @@ var staffController = {
         const staff = await prisma.staff.findUnique({
           where: {
             correo_institucional: params.correo_institucional,
+            estado: "Activo",
           },
           include: {
             departamento: true,
             cargo: true,
-            role: true,
+            role: {
+              select: {
+                role_name: true,
+              },
+            },
           },
         });
 
         if (!staff) {
           return res.status(404).send({
             status: "error",
-            message: "El usuario no existe",
+            message: "El usuario no existe o esta inactivo",
           });
         }
 

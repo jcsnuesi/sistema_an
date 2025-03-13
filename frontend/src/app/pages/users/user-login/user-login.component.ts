@@ -27,18 +27,17 @@ export class UserLoginComponent {
     ) {}
 
     login() {
-        console.log(this.data_usuario);
         this._userService.login(this.data_usuario).subscribe({
             next: (response) => {
                 if (response.status == 'success') {
-                    this._cookieService.set('identity', JSON.stringify(response.user));
+                    this._userService.setIdentity(response.user);
+                    // this._cookieService.set('identity', JSON.stringify(response.user), 1, '/');
                     this.data_usuario.token = true;
-                    console.log('login', this._cookieService.get('identity'));
 
                     this._userService.login(this.data_usuario).subscribe({
                         next: (response) => {
                             if (response.status == 'success') {
-                                this._cookieService.set('token', response.token);
+                                this._cookieService.set('token', response.token, 1, '/');
                                 this._router.navigate(['/home']);
                             } else {
                                 this._messageService.add({ severity: 'error', summary: 'Error', detail: response.message });

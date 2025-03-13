@@ -1,57 +1,53 @@
-import { Directive, Input } from '@angular/core';
-import { TemplateRef, ViewContainerRef } from '@angular/core';
-
-import { AspirantesService } from '../pages/service/aspirantes.service';
+import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, ChangeDetectorRef } from '@angular/core';
 import { UsersService } from '../pages/service/users.service';
+import { Subscription } from 'rxjs';
 
 @Directive({
     selector: '[appHasPermissions]',
-    standalone: true,
-    providers: [AspirantesService]
+    standalone: true
 })
-export class HasPermissionsDirective {
-    public hasRole: string[];
-    public identity: any;
+export class HasPermissionsDirective implements OnInit, OnDestroy {
+    private requiredRoles: string[] = [];
+    private identity: any;
+    private subscription!: Subscription;
 
     constructor(
         private templateRef: TemplateRef<any>,
         private viewContainer: ViewContainerRef,
-        private _aspiranteService: AspirantesService,
-        private _userService: UsersService
+        private _userService: UsersService,
+        private cdRef: ChangeDetectorRef
     ) {
-        this.hasRole = [];
-        if (Object.keys(this._userService.getIdentity()).length !== 0) {
-            this.identity = this._userService.getIdentity().role.role_name;
-        } else {
-            this.identity = this._aspiranteService.getIdentityAspirante();
-        }
+        this.identity = this._userService.getIdentity();
     }
 
     @Input()
-    set appHasPermissions(role: string[]) {
-        this.hasRole = role;
-        this.UpdateView();
+    set appHasPermissions(roles: string[]) {
+        this.requiredRoles = roles;
+        this.updateView();
     }
 
-    private UpdateView() {
+    ngOnInit() {
+        this.subscription = this._userService.identity$.subscribe((identity) => {
+            this.identity = identity;
+            this.updateView();
+            this.cdRef.detectChanges(); // Forzar detección de cambios
+        });
+    }
+
+    private updateView() {
         this.viewContainer.clear();
-        if (this.checkRole()) {
+
+        if (this.hasRequiredRole()) {
             this.viewContainer.createEmbeddedView(this.templateRef);
         }
     }
 
-    private checkRole(): boolean {
-        console.log('this.identity', this.identity);
-        if (this.identity) {
-            if (this.hasRole.includes(this.identity)) {
-                return true;
-            } else {
-                this.viewContainer.clear();
-                return false;
-            }
-        } else {
-            this.viewContainer.clear();
-            return false;
-        }
+    private hasRequiredRole(): boolean {
+        // console.warn('#######', this.identity);
+        return this.identity?.role?.role_name ? this.requiredRoles.includes(this.identity.role.role_name) : false;
+    }
+
+    ngOnDestroy() {
+        this.subscription?.unsubscribe();
     }
 }

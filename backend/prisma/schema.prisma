@@ -16,7 +16,7 @@ model aspirantes {
   nacionalidad           String
   estado_civil           String
   cedula                 String           @unique(map: "Aspirantes_cedula_key")
-  clave_temporal         String?          @default(uuid())
+  clave_temporal         String?
   dir_calle              String
   dir_sector             String?
   dir_provincia          String
@@ -68,7 +68,7 @@ model fact_aspirantes {
   grupo               Int
   genero_grupo        String
   fecha_creacion      DateTime?  @default(now())
-  fecha_actualizacion DateTime
+  fecha_actualizacion DateTime   @default(now())
   estatus_aspirante   String     @default("Activo")
   aspirantes          aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade, map: "Fact_aspirantes_id_aspirantes_fkey")
 }
@@ -82,7 +82,7 @@ model observacion {
   aspirantes          aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade, map: "Observacion_id_aspirantes_fkey")
   staff               staff      @relation(fields: [staff_id], references: [id], map: "Observacion_staff_id_fkey")
   atentido            Boolean    @default(false)
-  @@index([id_aspirantes], map: "Observacion_id_aspirantes_fkey")
+
 }
 
 model role {

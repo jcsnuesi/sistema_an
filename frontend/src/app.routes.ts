@@ -14,7 +14,7 @@ export const appRoutes: Routes = [
         children: [
             { path: '', canActivate: [UserGuard], component: Dashboard },
             { path: 'home', canActivate: [UserGuard], component: Dashboard },
-            { path: 'aspirantes', loadChildren: () => import('./app/pages/aspirantes/aspirantes.routes').then((m) => m.aspirantesRoutes) },
+            { path: 'aspirantes', canActivate: [UserGuard], loadChildren: () => import('./app/pages/aspirantes/aspirantes.routes').then((m) => m.aspirantesRoutes) },
             { path: 'users', loadChildren: () => import('./app/pages/users/users.routes').then((m) => m.usersRoutes) }
         ]
     },

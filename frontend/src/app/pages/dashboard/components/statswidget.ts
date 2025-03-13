@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,13 +11,13 @@ import { CommonModule } from '@angular/common';
                 <div class="flex justify-between mb-4">
                     <div>
                         <span class="block font-semibold text-lg mb-4">Nuevas solicitudes</span>
-                        <div class="text-4xl font-bold text-surface-900 dark:text-surface-0">152</div>
+                        <div class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ totalNotificaciones.total }}</div>
                     </div>
                     <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
                         <i class="pi pi-plus text-blue-500 !text-xl"></i>
                     </div>
                 </div>
-                <span class="text-primary font-medium">24 nuevas solicitudes </span>
+                <span class="text-primary font-medium">{{ totalNotificaciones.sinLeer }} nuevas solicitudes </span>
                 <span class="text-muted-color">sin revisar</span>
             </div>
         </div>
@@ -71,4 +71,6 @@ import { CommonModule } from '@angular/common';
         -->
     `
 })
-export class StatsWidget {}
+export class StatsWidget {
+    @Input() public totalNotificaciones: { total: number; sinLeer: number } = { total: 0, sinLeer: 0 };
+}

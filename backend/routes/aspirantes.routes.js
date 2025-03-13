@@ -20,14 +20,9 @@ router.get(
   aspirantesController.getByOccupation
 );
 router.get("/get-avatar/:path/:avatar", getAvatar);
-router.get(
-  "/nuevas-solicitudes",
-  authenticated,
-  aspirantesController.nuevasSolicitudes
-);
+router.get("/nuevas-solicitudes", aspirantesController.nuevasSolicitudes);
 router.get(
   "/get-observaciones/:id",
-  authenticated,
   aspirantesController.getObsercacionesByAspirante
 );
 router.get("/consultar-solicitudes/:id", aspirantesController.getSolicited);
@@ -42,18 +37,23 @@ router.post("/edicion-solicitada", aspirantesController.solicitarEdicion);
 router.post("/login-consulta", aspirantesController.loginConsulta);
 
 // PUT
-router.put("/update-aspirante/:id", aspirantesController.update);
+router.put(
+  "/update-aspirante/:id",
+  [multipartMiddleware],
+  aspirantesController.update
+);
 router.put("/delete-aspirante/:id", aspirantesController.delete);
 router.put("/upt-avatar-aspirante/:path", [multipartMiddleware], updateAvatar);
 router.put(
   "/update-estatus-solicitud/:id",
   authenticated,
-  aspirantesController.updateSolicitud
+  aspirantesController.updateEstatusSolicitud
 );
-router.put(
-  "/update-solicitud-aspirante",
-  authenticated,
-  aspirantesController.updateSolicitud
-);
+router.put("/update-badge", authenticated, aspirantesController.updateBadge);
+// router.put(
+//   "/update-solicitud-aspirante",
+//   authenticated,
+//   aspirantesController.updateSolicitud
+// );
 
 export default router;

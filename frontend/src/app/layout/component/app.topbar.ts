@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit, Input, DoCheck, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, DoCheck, AfterViewInit, OnDestroy } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -20,15 +20,17 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { HasPermissionsDirective } from '../../directive/has-permissions.directive';
 import { CookieService } from 'ngx-cookie-service';
+import { UsersService } from '../../pages/service/users.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
     imports: [HasPermissionsDirective, RouterModule, CommonModule, StyleClassModule, BadgeModule, OverlayBadgeModule, ButtonModule, InputTextModule, InputMaskModule, CardModule, DialogModule, MenuModule, ToastModule],
-    providers: [AspirantesService, MessageService, CookieService],
+    providers: [AspirantesService, MessageService, CookieService, UsersService],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <button *appHasPermissions="['ADMIN', 'SUPER_ADMIN', 'USUARIO']" class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
+            <button *ngIf="identity" class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
             <a class="layout-topbar-logo" routerLink="/">
@@ -66,13 +68,13 @@ import { CookieService } from 'ngx-cookie-service';
                 <div class="layout-topbar-menu-content">
                     <!--button type="button" class="layout-topbar-action" > <i class="pi pi-calendar"></i> <span>Calendar</span></button-->
 
-                    <button type="button" (click)="showDialog()">
-                        <p-overlaybadge [value]="badgeNotification" class="layout-topbar-action" *ngIf="showBar">
+                    <button type="button" (click)="showDialog()" *ngIf="aspirante_token || identity">
+                        <p-overlaybadge [value]="badgeNotification" class="layout-topbar-action">
                             <i class="pi pi-inbox"></i>
                         </p-overlaybadge>
                     </button>
                     <button (click)="menu.toggle($event)" type="button" class="layout-topbar-action">
-                        <i [class]="iconDinamico.icon"></i>
+                        <i [class]="menuDinamico.icon"></i>
                         <p-toast />
                     </button>
 
@@ -82,99 +84,94 @@ import { CookieService } from 'ngx-cookie-service';
         </div>
     </div>`
 })
-export class AppTopbar implements OnInit, DoCheck {
+export class AppTopbar implements OnInit, OnDestroy, AfterViewInit, DoCheck {
     items!: MenuItem[];
     public editarDialog: boolean = false;
     public aspirante_token: string | null;
     public url: string;
     public showPicture: string = '';
     public aspirante_identity: any;
-    public showBar: boolean = false;
-    public showBarAdmin: boolean = false;
     @Input() badgeNotification: number = 0;
     @Output() showDialogOut: EventEmitter<boolean> = new EventEmitter<boolean>();
-    public iconDinamico: { icon: string; label: string; mainlabel: string } = { icon: 'pi pi-sign-in', label: 'Login', mainlabel: 'Inicio de sesión' };
-    // pi pi-user
+    public menuDinamico: { icon: string; label: string; mainlabel: string } = { icon: 'pi pi-sign-in', label: 'Login', mainlabel: 'Inicio de sesión' };
+    private subscription!: Subscription;
+    public identity: any;
+
     constructor(
         public layoutService: LayoutService,
-        private _aspirantesService: AspirantesService,
         private _router: Router,
         private _messageService: MessageService,
-        private _cookieService: CookieService
+        private _cookieService: CookieService,
+        private _userService: UsersService
     ) {
-        this.aspirante_token = this._aspirantesService.getTokenAspirante() || null;
-        this.aspirante_identity = this._aspirantesService.getIdentityAspirante() || null;
+        this.aspirante_token = this._cookieService.get('tokenAspirante') || null;
+        this.aspirante_identity = this._cookieService.get('identityAspirante') || null;
         this.url = globalUrl.url;
 
         if (this.aspirante_token !== null) {
             this.showPicture = this.url + 'get-avatar/aspirantes/' + this.aspirante_identity.foto;
-            this.showBar = true;
         }
     }
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
     }
+
     ngDoCheck(): void {
-        const currentToken = this._aspirantesService.getTokenAspirante();
-        if (!currentToken && this.aspirante_token) {
-            this.aspirante_token = null;
-            this.showBar = false;
-            this.menuItems();
-        } else if (currentToken && !this.aspirante_token) {
-            this.aspirante_token = currentToken;
-            this.showBar = true;
-            this.menuItems();
-        }
+        this.identity = this._userService.getIdentity();
+        this.aspirante_token = this._cookieService.get('tokenAspirante');
     }
 
-    menuItems() {
-        if (this.aspirante_token) {
-            this.iconDinamico.mainlabel = 'Perfil';
-            this.iconDinamico.label = 'Logout';
-            this.iconDinamico.icon = 'pi pi-user';
-        } else {
-            this.iconDinamico.mainlabel = 'Inicio de sesión';
-            this.iconDinamico.label = 'Login';
-            this.iconDinamico.icon = 'pi pi-sign-in';
-        }
-    }
     ngOnInit() {
-        this.menuItems();
+        this.subscription = this._userService.identity$.subscribe((identity) => {
+            this.identity = identity;
+            this.updateMenu();
+        });
+    }
+
+    private updateMenu() {
+        if (this.identity) {
+            this.menuDinamico = { icon: 'pi pi-user', label: 'Logout', mainlabel: 'Perfil' };
+        } else {
+            this.menuDinamico = { icon: 'pi pi-sign-in', label: 'Login', mainlabel: 'Inicio de sesión' };
+        }
+
         this.items = [
             {
-                label: this.iconDinamico.mainlabel,
+                label: this.menuDinamico.mainlabel,
                 items: [
                     {
-                        label: this.iconDinamico.label,
-                        icon: this.iconDinamico.icon,
-                        command: () => {
-                            if (this.iconDinamico.label == 'Logout') {
-                                this.destroySession();
-                            }
-                        }
+                        label: this.menuDinamico.label,
+                        icon: this.menuDinamico.icon,
+                        command: () => this.logout()
                     }
                 ]
             }
         ];
     }
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.updateMenu();
+        });
+    }
 
+    logout() {
+        this._userService.clearIdentity();
+        this._router.navigate(['/users/login']);
+        this.destroySession();
+    }
+
+    ngOnDestroy(): void {
+        this.subscription?.unsubscribe();
+    }
     showDialog() {
         this.showDialogOut.emit(true);
     }
+
     destroySession() {
-        // this._aspirantesService.destroySession();
-        let datos = this._aspirantesService.getIdentityAspirante();
-
-        this._cookieService.delete('token', '/aspirantes', 'localhost');
-        this._cookieService.delete('identity', '/aspirantes', 'localhost');
-        this._cookieService.delete('token', '/users', 'localhost');
-        this._cookieService.delete('identity', '/users', 'localhost');
-
-        if (Object.keys(datos).length !== 0) {
-            this._router.navigate(['/aspirantes/login-consulta']);
-        } else {
-            this._router.navigate(['/users/login']);
-        }
+        this._cookieService.delete('tokenAspirante', '/aspirantes', 'localhost');
+        this._cookieService.delete('identityAspirante', '/aspirantes', 'localhost');
+        this._cookieService.delete('token', '/', 'localhost');
+        this._cookieService.delete('identity', '/', 'localhost');
     }
 }

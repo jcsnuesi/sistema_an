@@ -9,6 +9,7 @@ import { globalUrl } from '../../service/global.url';
 import { ImportsModule } from '../primeNG.module';
 import { ConfirmationService } from 'primeng/api';
 import { Table } from 'primeng/table';
+import { UsersService } from '../../service/users.service';
 
 @Component({
     selector: 'app-solicitudes-entrantes',
@@ -21,7 +22,7 @@ export class SolicitudesEntrantesComponent implements OnInit {
     public nuevasSolicitudes: any[] = [];
     public searchValue: string = '';
     @ViewChild('dt2') dt2!: Table;
-    public token: string;
+    public token: string | null;
     public url: string;
     public optionEstado: Array<{ label: string; value: string }> = [
         { label: 'Procesada', value: 'Procesada' },
@@ -34,11 +35,12 @@ export class SolicitudesEntrantesComponent implements OnInit {
     constructor(
         private _aspirantesService: AspirantesService,
         private _messageService: MessageService,
-        private _confirmationService: ConfirmationService
+        private _confirmationService: ConfirmationService,
+        private _usersService: UsersService
     ) {
         this.nuevasSolicitudes = [];
-        this.token =
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb3JyZW9faW5zdGl0dWNpb25hbCI6InRlY25vbG9naWFAYWNhZGVtaWEuY29tIiwibm9tYnJlcyI6IkhlY3RvciIsImFwZWxsaWRvcyI6IlNhbnRvcyIsInJvbGUiOnsiaWQiOjEsInJvbGVfbmFtZSI6IlNVUEVSX0FETUlOIiwicGVybWlzb3MiOiJcIkNSRUFURSwgUkVBRCwgVVBEQVRFLCBERUxFVEVcIiJ9LCJpYXQiOjE3NDE0NzAxODksImV4cCI6MTc0MTU1NjU4OX0.ucUSxhkohBmcgqX5QX8XfvK3QVnJb9L_qgC5QFBS_Fc';
+        this.token = this._usersService.gettoken();
+
         this.url = globalUrl.url;
     }
 

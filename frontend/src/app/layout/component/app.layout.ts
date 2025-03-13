@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, ElementRef, Input, AfterViewInit } from '@angular/core';
+import { Component, Renderer2, ViewChild, ElementRef, Input, AfterViewInit, DoCheck } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
@@ -16,6 +16,7 @@ import { DialogModule } from 'primeng/dialog';
 import { AspirantesService } from '../../pages/service/aspirantes.service';
 import { TextareaModule } from 'primeng/textarea';
 import { HasPermissionsDirective } from '../../directive/has-permissions.directive';
+import { UsersService } from '../../pages/service/users.service';
 
 @Component({
     selector: 'app-layout',
@@ -25,7 +26,7 @@ import { HasPermissionsDirective } from '../../directive/has-permissions.directi
     template: `
         <div #cambiarClase class="layout-wrapper" [ngClass]="containerClass">
             <app-topbar (showDialogOut)="showDialogMsg($event)" [badgeNotification]="badged"></app-topbar>
-            <app-sidebar *appHasPermissions="['SUPER_ADMIN', 'ADMIN', 'USUARIO']"></app-sidebar>
+            <app-sidebar *ngIf="identity"></app-sidebar>
             <div class="layout-main-container">
                 <div class="layout-main">
                     <router-outlet></router-outlet>
@@ -69,6 +70,8 @@ export class AppLayout implements AfterViewInit {
     public urlParam: string;
     public messageObservaciones: Array<{ comentario: string; fecha_hora: string; atentido: number; id: number; aspiranteId: number }> = [];
     public badged: number = 0;
+    public token: string = '';
+    public identity: any;
 
     constructor(
         public layoutService: LayoutService,
@@ -77,7 +80,8 @@ export class AppLayout implements AfterViewInit {
         private _activatedRoute: ActivatedRoute,
         private _router: Router,
         private _cookieService: CookieService,
-        private _aspirantesService: AspirantesService
+        private _aspirantesService: AspirantesService,
+        private _userService: UsersService
     ) {
         this.aspirante_token = this._aspirantesService.getTokenAspirante();
         this.aspirante_identity = this._aspirantesService.getIdentityAspirante();
@@ -104,8 +108,7 @@ export class AppLayout implements AfterViewInit {
 
         this.router.events.subscribe(() => {
             const currentUrl = this.router.url;
-            // console.log('currentUrl', currentUrl);
-            const hideSidebar = currentUrl.includes('login-consulta');
+            const hideSidebar = currentUrl.includes('login-consulta') || currentUrl.includes('users/login');
             this.layoutService.toggleSidebar(hideSidebar);
         });
     }
@@ -113,11 +116,17 @@ export class AppLayout implements AfterViewInit {
     showDialogMsg(event: boolean) {
         this.editarDialog = event;
     }
+
+    ngDoCheck() {
+        this.aspirante_token = this._aspirantesService.getTokenAspirante();
+        this.identity = this._userService.getIdentity();
+        this.aspirante_identity = this._aspirantesService.getIdentityAspirante();
+    }
     ngAfterViewInit() {
         if (this.cambiarClase) {
             setTimeout(() => {
                 this.layoutService.sidebarVisible$.subscribe((visible) => {
-                    console.log('hideSidebar', visible);
+                    // console.log('hideSidebar', visible);
                     if (visible) {
                         this.renderer.removeClass(this.cambiarClase.nativeElement, 'layout-wrapper');
                         // console.log('removeClass....', visible);

@@ -35,8 +35,8 @@ export class ConsultaLoginComponent {
                     this._aspirantesService.loginConsulta(this.data_aspirante).subscribe({
                         next: (res) => {
                             if (res.status == 'success') {
-                                this._cookieService.set('token', res.token);
-                                let cedula = JSON.parse(this._cookieService.get('identity')).cedula;
+                                this._cookieService.set('tokenAspirante', res.token);
+                                let cedula = JSON.parse(this._cookieService.get('identityAspirante')).cedula;
 
                                 this._router.navigate(['/aspirantes/consulta-solicitudes', cedula]);
                             } else {

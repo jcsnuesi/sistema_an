@@ -6,22 +6,23 @@ import { UsersService } from '../pages/service/users.service';
 @Injectable({
     providedIn: 'root'
 })
-export class UserGuard implements CanActivate {
+export class NoIdentityGuard implements CanActivate {
     constructor(
         private router: Router,
         private _userService: UsersService
     ) {}
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-        let token = this._userService.gettoken();
-        let identity = this._userService.getIdentity();
+    canActivate(): boolean {
+        const token = this._userService.gettoken();
+        const identity = this._userService.getIdentity();
 
         if (token && identity?.role?.role_name) {
-            return true;
-        } else {
-            console.log('No tienes permiso para acceder a esta página');
-            this.router.navigate(['/users/login']);
+            this.router.navigate(['/home']);
+            console.log('Redirigiendo a la página de inicio');
             return false;
+        } else {
+            console.log('Redirigiendo a la página de login');
+            return true;
         }
     }
 }

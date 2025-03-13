@@ -4,6 +4,16 @@ import { generarCodigoSistema } from "../service/generarCodigo.js";
 import { validateExtensions } from "../service/validateExtension.service.js";
 import { createTokenForLoginConsulta } from "../service/jwt.js";
 
+const generatePassword = await import("generate-password");
+const password = generatePassword.default.generate({
+  length: 8, // Longitud de la contraseña
+  numbers: true, // Incluir números
+  symbols: true, // Incluir símbolos
+  uppercase: true, // Incluir letras mayúsculas
+  lowercase: true, // Incluir letras minúsculas
+  excludeSimilarCharacters: true, // Excluir caracteres similares
+});
+
 const prisma = new PrismaClient();
 
 var aspirantesController = {
@@ -21,9 +31,8 @@ var aspirantesController = {
     try {
       var validate_cedula =
         !validator.isEmpty(params.cedula) && cedula.length === 13;
-      var validate_email = !validator.isEmpty(params.email);
+      var validate_email = validator.isEmail(params.email);
     } catch (err) {
-      console.log(err);
       return res.status(500).send({
         status: "error",
         message: "Faltan datos por enviar",
@@ -44,6 +53,7 @@ var aspirantesController = {
             nacionalidad: params.nacionalidad,
             estado_civil: params.estado_civil,
             cedula: params.cedula,
+            clave_temporal: password,
             dir_calle: params.dir_calle,
             dir_sector: params.dir_sector,
             dir_provincia: params.dir_provincia,
@@ -121,7 +131,7 @@ var aspirantesController = {
 
     try {
       await prisma.aspirantes.update({
-        where: { id: parseInt(paramId) },
+        where: { cedula: paramId },
         data: { ...datos },
       });
 
@@ -151,7 +161,7 @@ var aspirantesController = {
       });
     }
   },
-  updateSolicitud: async function (req, res) {
+  updateEstatusSolicitud: async function (req, res) {
     let paramId = req.params.id;
     let params = req.body;
 
@@ -172,6 +182,32 @@ var aspirantesController = {
       return res.status(500).send({
         status: "error",
         message: "Error al actualizar la solicitud",
+      });
+    }
+  },
+  updateBadge: async function (req, res) {
+    let paramId = req.body;
+
+    try {
+      const datos = await prisma.observacion.updateMany({
+        where: {
+          id_aspirantes: parseInt(paramId.aspiranteId),
+        },
+        data: {
+          atentido: Boolean(paramId.atentido == 1),
+        },
+      });
+
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+        message: datos,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({
+        status: "error",
+        message: "Error al actualizar el Badge",
       });
     }
   },
@@ -271,7 +307,6 @@ var aspirantesController = {
       });
     }
   },
-
   nuevasSolicitudes: async function (req, res) {
     try {
       const aspirante = await prisma.aspirantes.findMany({
@@ -321,6 +356,7 @@ var aspirantesController = {
           data: {
             observacion: param.observaciones,
             id_aspirantes: parseInt(param.id),
+            staff_id: param.staff_id,
           },
         });
         await prisma.fact_aspirantes.update({
@@ -424,9 +460,9 @@ var aspirantesController = {
         });
       } else {
         await prisma.$disconnect();
-        return res.status(203).send({
+        return res.status(404).send({
           status: "error",
-          message: "No se encontraron solicitudes con los datos proporcionados",
+          message: "Cédula o contraseña incorrecta",
         });
       }
     } catch (error) {
