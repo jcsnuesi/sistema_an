@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit, Input, DoCheck, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, DoCheck, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -22,13 +22,19 @@ import { HasPermissionsDirective } from '../../directive/has-permissions.directi
 import { CookieService } from 'ngx-cookie-service';
 import { UsersService } from '../../pages/service/users.service';
 import { Subscription } from 'rxjs';
+import { NotificationsService } from '../../pages/service/notifications.service';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { ConfirmationService } from 'primeng/api';
+import { Popover, PopoverModule } from 'primeng/popover';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [HasPermissionsDirective, RouterModule, CommonModule, StyleClassModule, BadgeModule, OverlayBadgeModule, ButtonModule, InputTextModule, InputMaskModule, CardModule, DialogModule, MenuModule, ToastModule],
-    providers: [AspirantesService, MessageService, CookieService, UsersService],
+    imports: [PopoverModule, ConfirmPopupModule, RouterModule, CommonModule, StyleClassModule, BadgeModule, OverlayBadgeModule, ButtonModule, InputTextModule, InputMaskModule, CardModule, DialogModule, MenuModule, ToastModule],
+    providers: [AspirantesService, MessageService, CookieService, UsersService, NotificationsService, ConfirmationService],
     template: ` <div class="layout-topbar">
+        <p-toast />
+
         <div class="layout-topbar-logo-container">
             <button *ngIf="identity" class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
@@ -66,16 +72,27 @@ import { Subscription } from 'rxjs';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <!--button type="button" class="layout-topbar-action" > <i class="pi pi-calendar"></i> <span>Calendar</span></button-->
-
-                    <button type="button" (click)="showDialog()" *ngIf="aspirante_token || identity">
+                    <button type="button" (click)="showDialog($event)" *ngIf="aspirante_token || identity">
                         <p-overlaybadge [value]="badgeNotification" class="layout-topbar-action">
                             <i class="pi pi-inbox"></i>
                         </p-overlaybadge>
                     </button>
+
+                    <p-popover #op (onHide)="actializarLeidos()">
+                        <div class="flex flex-col gap-4">
+                            <div>
+                                <span class="font-medium block mb-2 "><b>Notificaciones</b></span>
+                                <ul class="list-none p-0 m-0 flex flex-col">
+                                    <li>
+                                        <a [routerLink]="['/aspirantes/entradas-solicitudes']" class="cursor-pointer text-blue-500 hover:underline"> Tienes {{ badgeNotification }} solicitudes nuevas </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </p-popover>
+
                     <button (click)="menu.toggle($event)" type="button" class="layout-topbar-action">
                         <i [class]="menuDinamico.icon"></i>
-                        <p-toast />
                     </button>
 
                     <p-menu #menu [model]="items" [popup]="true" />
@@ -96,16 +113,21 @@ export class AppTopbar implements OnInit, OnDestroy, AfterViewInit, DoCheck {
     public menuDinamico: { icon: string; label: string; mainlabel: string } = { icon: 'pi pi-sign-in', label: 'Login', mainlabel: 'Inicio de sesión' };
     private subscription!: Subscription;
     public identity: any;
+    public token: string | null;
+    @ViewChild('op') op!: Popover;
 
     constructor(
         public layoutService: LayoutService,
         private _router: Router,
         private _messageService: MessageService,
         private _cookieService: CookieService,
-        private _userService: UsersService
+        private _userService: UsersService,
+        private _notificationsService: NotificationsService,
+        private _confirmationService: ConfirmationService
     ) {
         this.aspirante_token = this._cookieService.get('tokenAspirante') || null;
         this.aspirante_identity = this._cookieService.get('identityAspirante') || null;
+        this.token = this._userService.gettoken();
         this.url = globalUrl.url;
 
         if (this.aspirante_token !== null) {
@@ -117,6 +139,10 @@ export class AppTopbar implements OnInit, OnDestroy, AfterViewInit, DoCheck {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
     }
 
+    toggle(event: any) {
+        this.op.toggle(event);
+    }
+
     ngDoCheck(): void {
         this.identity = this._userService.getIdentity();
         this.aspirante_token = this._cookieService.get('tokenAspirante');
@@ -125,7 +151,28 @@ export class AppTopbar implements OnInit, OnDestroy, AfterViewInit, DoCheck {
     ngOnInit() {
         this.subscription = this._userService.identity$.subscribe((identity) => {
             this.identity = identity;
+            if (this.identity) {
+                this.getNotificationsNewAspirante();
+            }
+
             this.updateMenu();
+        });
+    }
+
+    dataToUpdateLeidos: any = [];
+    getNotificationsNewAspirante() {
+        this._notificationsService.getNuevoAspirantesNotificacion(this.token).subscribe({
+            next: (response) => {
+                let leidos = response.message.map((item: any) => {
+                    this.dataToUpdateLeidos.push({ id: item.id });
+                    let fact = item.fact_aspirantes.filter((fact: any) => fact.leidos === false);
+                    return fact.length;
+                });
+                this.badgeNotification = leidos.reduce((a: number, b: number) => a + b, 0);
+            },
+            error: (error) => {
+                console.error(error);
+            }
         });
     }
 
@@ -164,8 +211,22 @@ export class AppTopbar implements OnInit, OnDestroy, AfterViewInit, DoCheck {
     ngOnDestroy(): void {
         this.subscription?.unsubscribe();
     }
-    showDialog() {
-        this.showDialogOut.emit(true);
+    showDialog(event: any) {
+        if (this.identity) {
+            this.toggle(event);
+            this.dataToUpdateLeidos;
+            this._notificationsService.setLeidosTrue(this.token, this.dataToUpdateLeidos).subscribe({
+                next: (response) => {
+                    this.dataToUpdateLeidos = [];
+                }
+            });
+        } else {
+            this.showDialogOut.emit(true);
+        }
+    }
+
+    actializarLeidos() {
+        this.badgeNotification = 0;
     }
 
     destroySession() {

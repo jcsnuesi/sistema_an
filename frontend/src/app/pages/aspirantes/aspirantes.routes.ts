@@ -6,6 +6,7 @@ import { ConsultaLoginComponent } from './consulta-login/consulta-login.componen
 import { AspirantesComponent } from './aspirantes.component';
 import { AspirantesGuard } from '../../guard/aspirantes.guard';
 import { UserGuard } from '../../guard/user.guard';
+import { AdministrarAspirantesComponent } from './administrar-aspirantes/administrar-aspirantes.component';
 
 export const aspirantesRoutes: Routes = [
     {
@@ -15,6 +16,7 @@ export const aspirantesRoutes: Routes = [
             { path: 'nueva-solicitud', canActivate: [UserGuard], component: SolicitudesComponent },
             { path: 'entradas-solicitudes', canActivate: [UserGuard], component: SolicitudesEntrantesComponent },
             { path: 'consulta-solicitudes/:id', canActivate: [AspirantesGuard], component: ConsultaSolicitudComponent },
+            { path: 'admin-aspirantes', canActivate: [UserGuard], component: AdministrarAspirantesComponent },
             { path: 'login-consulta', loadComponent: () => import('./consulta-login/consulta-login.component').then((m) => m.ConsultaLoginComponent) },
             { path: '**', redirectTo: 'login-consulta', pathMatch: 'full' },
             { path: '', redirectTo: 'login-consulta', pathMatch: 'full' }

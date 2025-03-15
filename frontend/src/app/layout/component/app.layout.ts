@@ -21,7 +21,7 @@ import { UsersService } from '../../pages/service/users.service';
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [HasPermissionsDirective, CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, ButtonModule, InputTextModule, InputMaskModule, CardModule, DialogModule, TextareaModule],
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, ButtonModule, InputTextModule, InputMaskModule, CardModule, DialogModule, TextareaModule],
     providers: [AspirantesService],
     template: `
         <div #cambiarClase class="layout-wrapper" [ngClass]="containerClass">

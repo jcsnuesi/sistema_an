@@ -40,7 +40,6 @@ export class SolicitudesEntrantesComponent implements OnInit {
     ) {
         this.nuevasSolicitudes = [];
         this.token = this._usersService.gettoken();
-
         this.url = globalUrl.url;
     }
 

@@ -10,7 +10,11 @@ const router = Router();
 
 // GET
 router.get("/aspirantes", aspirantesController.testAspirantes);
-router.get("/get-aspirantes", aspirantesController.getAspirantes);
+router.get(
+  "/get-aspirantes",
+  authenticated,
+  aspirantesController.getAspirantes
+);
 router.get(
   "/get-aspirantes-bygroup/:grupo/:genero_grupo?",
   aspirantesController.getAspirantesByGroup
@@ -26,6 +30,11 @@ router.get(
   aspirantesController.getObsercacionesByAspirante
 );
 router.get("/consultar-solicitudes/:id", aspirantesController.getSolicited);
+router.get(
+  "/aspirantes-procesados",
+  authenticated,
+  aspirantesController.getAspirantesProcesados
+);
 
 // POST
 router.post(
@@ -50,6 +59,11 @@ router.put(
   aspirantesController.updateEstatusSolicitud
 );
 router.put("/update-badge", authenticated, aspirantesController.updateBadge);
+router.put(
+  "/set-leidos-aspirantes",
+  authenticated,
+  aspirantesController.updateLeidos
+);
 // router.put(
 //   "/update-solicitud-aspirante",
 //   authenticated,

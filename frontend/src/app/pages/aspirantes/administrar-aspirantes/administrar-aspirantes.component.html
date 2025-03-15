@@ -1,0 +1,442 @@
+<p-toast />
+<p-confirmDialog />
+<div class="card">
+    <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold mb-4">Administración</div>
+
+    <p-table #dt2 [value]="aspirantesList" dataKey="_id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true" [globalFilterFields]="['codigo_aspirante', 'grupo', 'fullname', 'edad', 'estatus']" [tableStyle]="{ 'min-width': '75rem' }">
+        <ng-template #caption>
+            <div class="flex">
+                <p-button label="Clear" [outlined]="true" icon="pi pi-filter-slash" (click)="clear(dt2)" />
+                <p-iconfield iconPosition="left" class="ml-auto">
+                    <p-inputicon>
+                        <i class="pi pi-search"></i>
+                    </p-inputicon>
+                    <input pInputText type="text" (input)="applyGlobalFilter($event)" placeholder="Search keyword" />
+                </p-iconfield>
+            </div>
+        </ng-template>
+        <ng-template #header>
+            <tr>
+                <th style="width: 10%; text-align: center">Codigo</th>
+                <th style="width: 10%; text-align: center">Grupo</th>
+                <th style="width: 22%; text-align: center">Nombre Completo</th>
+                <th style="width: 22%; text-align: center">Edad</th>
+                <th style="width: 12%; text-align: center">Estatus</th>
+                <th style="width: 12%; text-align: center">Ver</th>
+                <th style="width: 12%; text-align: center">Edicion</th>
+                <!-- Estatus: en proceso, modificacion, Aceptada   -->
+            </tr>
+            <tr>
+                <th style="width: 10%">
+                    <p-columnFilter type="text" field="codigo_aspirante" placeholder="Codigo" ariaLabel="Filter codigo"></p-columnFilter>
+                </th>
+                <th style="width: 10%">
+                    <p-columnFilter type="text" field="grupo" placeholder="Grupo" ariaLabel="Filter grupo"></p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="fullname" placeholder="Nombre y/o Apellido" ariaLabel="Filter fullname"></p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="edad" placeholder="Edad" ariaLabel="Filter edad"></p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="estatus" placeholder="Estatus" ariaLabel="Filter estatus"></p-columnFilter>
+                </th>
+                <th>
+                    <i class="pi pi-eye" style="display: flex; justify-content: center"></i>
+                </th>
+                <th>
+                    <i class="pi pi-file-edit" style="display: flex; justify-content: center"></i>
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-aspirantes>
+            <tr>
+                <td style="text-align: center">
+                    {{ aspirantes?.codigo_aspirante }}
+                </td>
+                <td style="text-align: center">
+                    {{ aspirantes?.grupo }}
+                </td>
+                <td style="text-align: left">
+                    {{ aspirantes?.fullname }}
+                </td>
+                <td style="text-align: center">
+                    {{ aspirantes?.edad }}
+                </td>
+
+                <td style="text-align: center">
+                    <p-tag [severity]="getSeverity(aspirantes?.estado)" [value]="aspirantes?.estado" />
+                </td>
+                <td style="text-align: center">
+                    <button pButton type="button" icon="pi pi-file-pdf" class="p-button-rounded p-button-text" severity="danger" (click)="verSolicitud(aspirantes?.data)"></button>
+                </td>
+                <td style="text-align: center">
+                    <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="warn" (click)="editar(aspirantes?.data)"></button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="5">No aspirantes encontrados.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- Dialog edicion -->
+
+<p-dialog header="Editar aspirante" [modal]="true" [(visible)]="editarDialog" [style]="{ width: '100vw', height: '100vh' }" [breakpoints]="{ '1199px': '100vw', '575px': '100vw' }">
+    <div class="editar-dialog">
+        <div class="col mr-4">
+            <img [src]="url + 'get-avatar/aspirantes/sYxZEH1uIWZPByqpHG1AR-Jt.jpg'" alt="" width="230px" height="200" class="foto-stilo" />
+        </div>
+        <div class="ancho">
+            <div class="titulo">
+                <div class="nombresCompleto">
+                    <h3>Jose Mendoza</h3>
+                </div>
+                <div class="statusAspirante">
+                    <p-tag [severity]="getSeverity('Preseleccionado')" [value]="'Preseleccionado'" [style]="{ 'font-size': '19px' }" />
+                </div>
+            </div>
+            <div class="cards">
+                <div class="card flex gap-2">
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-clock text-blue-500 !text-xl"></i>
+                    </div>
+                    <div style="font-size: 12px; color: rgb(163, 163, 163); text-align: center">
+                        <h4 class="m-0">19 años</h4>
+                        Edad
+                    </div>
+                </div>
+                <div class="card flex mr-5 gap-2">
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-mars text-blue-500 !text-xl"></i>
+                        <!-- <i class="pi pi-venus text-blue-500 !text-xl"></i> -->
+                    </div>
+                    <div style="font-size: 12px; color: rgb(163, 163, 163); text-align: center">
+                        <h4 class="m-0">Masculino</h4>
+                        Genero
+                    </div>
+                </div>
+                <div class="card flex mr-5 gap-2">
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-id-card text-blue-500 !text-xl"></i>
+                        <!-- <i class="pi pi-venus text-blue-500 !text-xl"></i> -->
+                    </div>
+                    <div style="font-size: 12px; color: rgb(163, 163, 163); text-align: center">
+                        <h4 class="m-0">402-1111111-1</h4>
+                        Cedula
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <!-- <p-panel header="¡Registro exitoso!✅" >
+            <div class="confetti-card">
+                <div>
+                    <ul class="separacion-texto">
+                        <li><b>Codigo de aspirante:</b> M-3 {{ nuevoAspirante.codigo_aspirante }}</li>
+                        <li>
+                            <b>Grupo: 1 {{ nuevoAspirante.grupo }}</b>
+                        </li>
+                        <li><b>Contraseña:</b> {{ nuevoAspirante.clave }}</li>
+                        <li><span class="submgs">Guarde esta contraseña para que pueda consultar el estatus de su aspirante</span></li>
+                    </ul>
+                </div> 
+                <div style="margin-left: 20px">
+                    <p style="margin-bottom: 0">
+                        <b>Estados:</b>
+                        <p-tag [severity]="getSeverity('En Proceso')" [value]="'En Proceso'" />
+                    </p>
+
+                    <ul class="ulPanel">
+                        <li>
+                            <p-button label="Nueva aspirante" [link]="true" (click)="nuevoAspirante.codigo_aspirante = null" />
+                        </li>
+                        <li>
+                            <p-button label="Ir al panel de consultas" [link]="true" [routerLink]="['aspirantes/consolta-aspirantees']" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </p-panel> -->
+
+        <form #aspirantesForm="ngForm" (ngSubmit)="onSubmit(aspirantesForm)">
+            <p-panel [style]="{ 'margin-bottom': '15px' }">
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mb-5" style="margin-bottom: 15px">
+                    <h5>Actualización de datos</h5>
+                </div>
+
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2 flex flex-col gap-2 center-content">
+                        <img [src]="url + 'get-avatar/aspirantes/sYxZEH1uIWZPByqpHG1AR-Jt.jpg'" alt="avatar" width="145px" height="135px" />
+                        <p-fileupload
+                            mode="basic"
+                            name="demo[]"
+                            chooseIcon="pi pi-upload"
+                            url="https://www.primefaces.org/cdn/api/upload.php"
+                            accept="image/*"
+                            maxFileSize="1000000"
+                            (onUpload)="onBasicUploadAuto($event)"
+                            [auto]="true"
+                            chooseLabel="Subir foto"
+                        />
+                    </div>
+                    <span class="text-spacing"
+                        ><b>Requisitos para la foto:</b>
+                        <ul class="ulClass">
+                            <li>Debe ser una foto formal</li>
+                            <li>Debe ser de los hombros hacia arriba</li>
+                        </ul>
+                    </span>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2 flex flex-col gap-2">
+                        <label for="nombresLabel">Nombres</label>
+                        <input id="nombresLabel" type="text" pInputText #nombres="ngModel" name="nombres" [(ngModel)]="aspirante.nombres" required />
+                    </div>
+                    <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                        <label for="apellidosLabel">Apellidos</label>
+                        <input id="apellidosLabel" type="text" pInputText #apellidos="ngModel" name="apellidos" [(ngModel)]="aspirante.apellidos" required />
+                    </div>
+                    <div class="col md:w-100 ml-4 flex flex-col gap-2">
+                        <label for="generoLabel">Genero</label>
+                        <p-select [options]="optionGenero" id="generoLabel" #genero="ngModel" name="genero" [(ngModel)]="generoSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                    </div>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="col w-100 flex flex-col gap-2">
+                        <label for="fechaNacimientoLabel">Fecha de nacimiento</label>
+                        <p-inputmask id="fechaNacimientoLabel" mask="99/99/9999" #f_nacimiento="ngModel" name="f_nacimiento" placeholder="dd/mm/yyyy" [(ngModel)]="aspirante.f_nacimiento" required></p-inputmask>
+                    </div>
+
+                    <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                        <label for="l_nacimientoLabel">Lugar de nacimiento</label>
+                        <input id="l_nacimientoLabel" type="text" pInputText #l_nacimiento="ngModel" name="l_nacimiento" [(ngModel)]="aspirante.lugar_nacimiento" required />
+                    </div>
+                    <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                        <label for="nacionalidadLabel">Nacionalidad</label>
+                        <input id="nacionalidadLabel" type="text" pInputText #nacionalidad="ngModel" name="nacionalidad" [(ngModel)]="aspirante.nacionalidad" required />
+                    </div>
+                </div>
+                <div class="info-personal row mt-4 mb-5">
+                    <div class="col md:w-1/2 flex flex-col gap-2">
+                        <label for="estadoCivilLabel">Estado civil</label>
+                        <p-select [options]="optionEstadoCivil" id="estadoCivilLabel" #e_civil="ngModel" name="e_civil" [(ngModel)]="estadoCivilSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                    </div>
+                    <div class="ml-4 flex flex-col gap-2">
+                        <label for="cedulaLabel">Cedula</label>
+                        <p-inputmask id="cedulaLabel" mask="999-9999999-9" placeholder="402-1111111-1" #cedula="ngModel" name="cedula" [(ngModel)]="aspirante.cedula" required></p-inputmask>
+                    </div>
+                    <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                        <label for="ocupacionLabel">Ocupacion</label>
+                        <p-select
+                            [options]="optionOcupacion"
+                            id="ocupacionLabel"
+                            #ocupacion="ngModel"
+                            name="ocupacion"
+                            [(ngModel)]="ocupacionSelected"
+                            optionLabel="label"
+                            placeholder="Seleccionar..."
+                            (onChange)="ocupacionSelectedChange()"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div *ngIf="ocupacionSelectedChange()" class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Militares</h5>
+                </div>
+
+                <div class="info-personal row mt-4 mb-5" *ngIf="ocupacionSelectedChange()">
+                    <div class="flex flex-col gap-2">
+                        <label for="institucionlLabel">Institucion</label>
+                        <p-select
+                            [options]="institucionesMilitaresOptions"
+                            id="institucionlLabel"
+                            #institucion_militar="ngModel"
+                            name="institucion_militar"
+                            [(ngModel)]="institucionesSelected"
+                            optionLabel="label"
+                            placeholder="Seleccionar..."
+                            (onChange)="rangosList()"
+                        />
+                    </div>
+                    <div class="ml-4 flex flex-col gap-2">
+                        <label for="rangoLabel">Rango</label>
+                        <p-select [options]="rangosOptions" id="rangoLabel" #rango="ngModel" name="rango" [(ngModel)]="rangoSelected" optionLabel="label" placeholder="Seleccionar..." />
+                    </div>
+
+                    <div class="ml-4 flex flex-col gap-2">
+                        <label for="f_ingresoLabel">Fecha ingreso</label>
+                        <p-inputmask id="f_ingresoLabel" mask="99/9999" placeholder="mm/yyyy" #f_ingreso="ngModel" name="f_ingreso" [(ngModel)]="aspirante.fecha_ingreso" required></p-inputmask>
+                    </div>
+                    <div class="ml-4 flex flex-col gap-2">
+                        <label for="fecha_ultimo_ascensoLabel">Fecha ultimo ascenso</label>
+                        <p-inputmask id="fecha_ultimo_ascensoLabel" mask="99/9999" placeholder="mm/yyyy" #fecha_ultimo_ascenso="ngModel" name="fecha_ultimo_ascenso" [(ngModel)]="aspirante.fecha_ultimo_ascenso" required></p-inputmask>
+                    </div>
+                </div>
+
+                <hr />
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Datos medicos</h5>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2 flex flex-col gap-2">
+                        <label for="alergicoLabel">Alergico a:</label>
+                        <input type="text" pInputText id="alergicoLabel" #alergico="ngModel" name="alergico" [(ngModel)]="aspirante.alergico" />
+                    </div>
+
+                    <div class="col md:w-1/2 ml-4 flex flex-col gap-2">
+                        <label for="discapacidadLabel">¿Tiene alguna discapacidad?</label>
+                        <p-select
+                            [options]="optionDiscapacidad"
+                            id="discapacidadLabel"
+                            #discapacidad="ngModel"
+                            name="discapacidad"
+                            [(ngModel)]="descapasidadSelected"
+                            optionLabel="label"
+                            placeholder="Seleccionar..."
+                            (selected)="habilitarDiscapacidad()"
+                            required
+                        />
+                    </div>
+                </div>
+                <div class="info-personal row mt-4 mb-5">
+                    <div class="col md:w-1/2 flex flex-col gap-2" *ngIf="habilitarDiscapacidad()">
+                        <label for="discapacidadDesLabel">Especifique su discapacidad</label>
+
+                        <textarea pTextarea #discapacidadDes="ngModel" name="discapacidadDes" [(ngModel)]="aspirante.discapacidad_detalle" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <hr />
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Contactos</h5>
+                </div>
+
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2 flex flex-col gap-2 flex-1">
+                        <label for="telefonoLabel">Telefono</label>
+                        <p-inputmask class="w-full" id="telefonoLabel" mask="999-999-9999" placeholder="809-777-8899" #telefono="ngModel" name="telefono" [(ngModel)]="aspirante.telefono"></p-inputmask>
+                    </div>
+                    <div class="col md:w-1/2 flex flex-col gap-2 flex-1">
+                        <label for="celularLabel">Celular</label>
+                        <p-inputmask class="w-full" id="celularLabel" mask="999-999-9999" placeholder="809-777-8899" #celular="ngModel" name="celular" [(ngModel)]="aspirante.celular" required></p-inputmask>
+                    </div>
+                    <div class="col md:w-1/2 flex flex-col gap-2 flex-1">
+                        <label for="emailLabel">Correo/Email</label>
+
+                        <input class="w-full" pInputText id="emailLabel" type="email" placeholder="usuario@ejemplo.com" #email="ngModel" name="email" [(ngModel)]="aspirante.email" required />
+                    </div>
+                </div>
+
+                <hr />
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Dirección</h5>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2">
+                        <div class="flex flex-col gap-2">
+                            <label for="direccionLabel">Calle</label>
+                            <input id="direccionLabel" type="text" pInputText #dir_calle="ngModel" name="dir_calle" [(ngModel)]="aspirante.dir_calle" placeholder="Calle Armando Jose, No.22" required />
+                        </div>
+                    </div>
+                    <div class="col md:w-1/2 ml-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="sectorLabel">Sector</label>
+                            <input id="sectorLabel" type="text" pInputText #dir_sector="ngModel" name="dir_sector" [(ngModel)]="aspirante.dir_sector" placeholder="Arroyo hondo" />
+                        </div>
+                    </div>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="col md:w-1/2">
+                        <div class="flex flex-col gap-2">
+                            <label for="municipioLabel">Municipio de procedencia</label>
+                            <input id="municipioLabel" type="text" pInputText #municipio="ngModel" name="municipio" [(ngModel)]="aspirante.dir_municipio" placeholder="Santo Domingo Oeste" required />
+                        </div>
+                    </div>
+
+                    <div class="col md:w-1/2 ml-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="dir_provinciaLabel">Provincia</label>
+                            <input id="dir_provinciaLabel" type="text" pInputText #dir_provincia="ngModel" name="dir_provincia" [(ngModel)]="aspirante.dir_provincia" placeholder="Santo Domingo" required />
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Datos academicos</h5>
+                </div>
+
+                <div class="info-personal row mt-4">
+                    <div class="flex flex-col gap-2" style="width: 100%">
+                        <label for="escuelaLabel">Centro Educativo</label>
+                        <input id="escuelaLabel" type="text" pInputText #escuela="ngModel" name="escuela" [(ngModel)]="aspirante.escuela" required />
+                    </div>
+                    <div class="col ml-4 flex flex-col gap-2" style="width: 100%">
+                        <label for="sectorEduLabel">Sector educativo</label>
+                        <p-select [options]="sectorEduOptions" id="sectorEduLabel" #sector_educativo="ngModel" name="sector_educativo" [(ngModel)]="sectorEduSelected" optionLabel="label" placeholder="Seleccionar..." required />
+                    </div>
+                    <div class="col ml-4 flex flex-col gap-2" style="width: 100%">
+                        <label for="programa_al_que_aspiraLabel">Programa al que aspira</label>
+                        <input id="programa_al_que_aspiraLabel" type="text" pInputText #programa_al_que_aspira="ngModel" name="programa_al_que_aspira" [(ngModel)]="aspirante.programa_al_que_aspira" readonly />
+                    </div>
+                </div>
+
+                <hr />
+                <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h5>Datos Familiares</h5>
+                </div>
+
+                <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h6>Información del padre:</h6>
+                </div>
+
+                <div class="info-personal row mt-4">
+                    <div class="flex flex-col gap-2" style="width: 100%">
+                        <label for="padreLabel">Nombres</label>
+                        <input id="padreLabel" type="text" pInputText #padre="ngModel" name="padre" [(ngModel)]="aspirante.nombre_padre" />
+                    </div>
+                    <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                        <label for="apellidosPadreLabel">Apellidos</label>
+                        <input id="apellidosPadreLabel" type="text" pInputText #apellido_padre="ngModel" name="apellido_padre" [(ngModel)]="aspirante.apellido_padre" />
+                    </div>
+                    <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                        <label for="tel_padreLabel">Telefono</label>
+                        <p-inputmask id="tel_padreLabel" mask="999-999-9999" placeholder="849-444-5555" #tel_padre="ngModel" name="tel_padre" [(ngModel)]="aspirante.telefono_padre"></p-inputmask>
+                    </div>
+                </div>
+
+                <div class="font-semibold text-lg text-surface-600 dark:text-surface-0 mt-5" style="margin-bottom: 15px">
+                    <h6>Información del madre:</h6>
+                </div>
+                <div class="info-personal row mt-4">
+                    <div class="flex flex-col gap-2" style="width: 100%">
+                        <label for="madreLabel">Nombres</label>
+                        <input id="madreLabel" type="text" pInputText #madre="ngModel" name="madre" [(ngModel)]="aspirante.nombre_madre" required />
+                    </div>
+                    <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                        <label for="apellidosMadreLabel">Apellidos</label>
+                        <input id="apellidosMadreLabel" type="text" pInputText #apellido_madre="ngModel" name="apellido_madre" [(ngModel)]="aspirante.apellido_madre" required />
+                    </div>
+                    <div class="flex flex-col ml-4 gap-2" style="width: 100%">
+                        <label for="telefono_madreLabel">Telefono</label>
+                        <p-inputmask id="telefono_madreLabel" mask="999-999-9999" placeholder="849-444-5555" #telefono_madre="ngModel" name="telefono_madre" [(ngModel)]="aspirante.telefono_madre" required></p-inputmask>
+                    </div>
+                </div>
+            </p-panel>
+
+            <div class="flex justify-end mt-5">
+                <button pButton type="submit" label="Actualizar" size="large" class="p-button-warn" [disabled]="aspirantesForm.invalid"></button>
+            </div>
+        </form>
+    </div>
+</p-dialog>

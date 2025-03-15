@@ -36,7 +36,7 @@ export class AspirantesService {
 
     getNuevosAspirantes(token: string | null): Observable<any> {
         if (token == null) {
-            return error('No se ha proporcionado un token');
+            throw new Error('No se ha proporcionado un token');
         }
         let header = new HttpHeaders().set('Authorization', token);
         return this._http.get(this.url + 'nuevas-solicitudes', { headers: header });
@@ -44,7 +44,7 @@ export class AspirantesService {
 
     solicitarEdicion(aspirante: any, token: string | null): Observable<any> {
         if (token == null) {
-            return error('No se ha proporcionado un token');
+            throw new Error('No se ha proporcionado un token');
         }
         let params = JSON.stringify(aspirante);
         let header = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
@@ -52,7 +52,7 @@ export class AspirantesService {
     }
     getObservacionesById(token: string | null, id: string): Observable<any> {
         if (token == null) {
-            return error('No se ha proporcionado un token');
+            throw new Error('No se ha proporcionado un token');
         }
         let header = new HttpHeaders().set('Authorization', token);
         return this._http.get(this.url + 'get-observaciones/' + id, { headers: header });
@@ -60,14 +60,14 @@ export class AspirantesService {
 
     updateSolicitud(token: string | null, status: string, id: string): Observable<any> {
         if (token == null) {
-            return error('No se ha proporcionado un token');
+            throw new Error('No se ha proporcionado un token');
         }
         let header = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
         return this._http.put(this.url + 'update-estatus-solicitud/' + id, { estatus_solicitud: status }, { headers: header });
     }
     consultarSolicitud(id: string | null): Observable<any> {
         if (id == null) {
-            return error('No se ha proporcionado un id');
+            throw new Error('No se ha proporcionado un token');
         }
         return this._http.get(this.url + 'consultar-solicitudes/' + id);
     }
@@ -87,5 +87,13 @@ export class AspirantesService {
     destroySession() {
         this._cookieService.delete('tokenAspirante', '/');
         this._cookieService.delete('identityAspirante', '/');
+    }
+
+    getAspirantesProcesados(token: string | null): Observable<any> {
+        if (token == null) {
+            throw new Error('No se ha proporcionado un token');
+        }
+        let header = new HttpHeaders().set('Authorization', token);
+        return this._http.get(this.url + 'aspirantes-procesados', { headers: header });
     }
 }

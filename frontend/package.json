@@ -22,6 +22,7 @@
         "@primeng/themes": "^19.0.5",
         "chart.js": "4.4.2",
         "file-saver": "^2.0.5",
+        "html2canvas": "^1.4.1",
         "ngx-cookie-service": "^19.1.2",
         "pdf-lib": "^1.17.1",
         "primeclt": "^0.1.5",

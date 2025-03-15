@@ -31,7 +31,7 @@ export class AppMenu {
                 items: [
                     { label: 'Crear solicitud', icon: 'pi pi-fw pi-plus-circle', routerLink: ['/aspirantes/nueva-solicitud'] },
                     { label: 'Nuevas solicitudes', icon: 'pi pi-fw pi-inbox', routerLink: ['/aspirantes/entradas-solicitudes'] },
-                    { label: 'Sección de aspirantes', icon: 'pi pi-fw pi-list', routerLink: ['/list-aspirantes'] },
+                    { label: 'Sección de aspirantes', icon: 'pi pi-fw pi-list', routerLink: ['/aspirantes/admin-aspirantes'] },
                     { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', routerLink: ['/uikit/formlayout'] }
                 ]
             }

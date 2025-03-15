@@ -211,6 +211,34 @@ var aspirantesController = {
       });
     }
   },
+  updateLeidos: async function (req, res) {
+    let param = req.body;
+    let ids = param.map((id) => parseInt(id.id));
+
+    try {
+      await prisma.fact_aspirantes.updateMany({
+        where: {
+          id_aspirantes: {
+            in: ids,
+          },
+        },
+        data: {
+          leidos: true,
+        },
+      });
+
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({
+        status: "error",
+        message: "Error al actualizar el updateLeidos",
+      });
+    }
+  },
   delete: async function (req, res) {
     let paramId = req.params.id;
 
@@ -428,6 +456,33 @@ var aspirantesController = {
       return res.status(500).send({
         status: "error",
         message: "Error al obtener la solicitud",
+      });
+    }
+  },
+  getAspirantesProcesados: async function (req, res) {
+    try {
+      const aspirante = await prisma.aspirantes.findMany({
+        where: {
+          fact_aspirantes: {
+            some: {
+              estatus_solicitud: "Procesada",
+            },
+          },
+        },
+        include: {
+          fact_aspirantes: true,
+        },
+      });
+
+      await prisma.$disconnect();
+      return res.status(200).send({
+        status: "success",
+        message: aspirante,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        status: "error",
+        message: "Error al obtener aspirantes procesados",
       });
     }
   },

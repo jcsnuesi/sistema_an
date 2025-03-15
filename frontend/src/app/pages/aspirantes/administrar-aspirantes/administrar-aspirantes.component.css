@@ -1,0 +1,90 @@
+.message-container {
+    max-height: 300px; /* Ajusta la altura máxima del contenedor */
+    overflow-y: auto; /* Habilita el scroll vertical cuando se excede la altura */
+    border: 1px solid #ccc; /* Opcional: para delimitar visualmente el área */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.texto-derecha {
+    text-align: justify;
+    color: black;
+}
+
+.foto-seccion-editar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+.editar-dialog {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.cards {
+    display: flex;
+}
+
+.titulo {
+    display: flex;
+    justify-content: space-between;
+}
+.statusAspirante {
+    float: right;
+}
+.ancho {
+    width: 100%;
+}
+
+.foto-stilo {
+    border-radius: 5%;
+}
+
+.info-personal {
+    display: flex;
+}
+
+.p-inputtext {
+    width: 100%;
+}
+
+.text-spacing {
+    line-height: 1.5;
+}
+
+.confetti-card {
+    display: flex;
+}
+.p-panel-title {
+    font-size: 1.5em;
+}
+.link-primary {
+    color: #007bff;
+}
+.submgs {
+    font-size: 14px;
+}
+.ulClass {
+    list-style-type: disc;
+    padding-inline-start: 20px;
+}
+.ulPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Ajusta el espacio entre elementos */
+    padding: 0;
+    margin: 0;
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.separacion-texto {
+    line-height: 1.5;
+}

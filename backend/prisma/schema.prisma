@@ -67,9 +67,10 @@ model fact_aspirantes {
   codigo_sistema      String
   grupo               Int
   genero_grupo        String
-  fecha_creacion      DateTime?  @default(now())
+  fecha_creacion      DateTime  @default(now())
   fecha_actualizacion DateTime   @default(now())
   estatus_aspirante   String     @default("Activo")
+  leidos              Boolean    @default(false)
   aspirantes          aspirantes @relation(fields: [id_aspirantes], references: [id], onDelete: Cascade, map: "Fact_aspirantes_id_aspirantes_fkey")
 }
 
